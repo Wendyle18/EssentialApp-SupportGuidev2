@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Essential Shopify Support Dashboard</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+  <!-- ===== TOP BAR ===== -->
+  <header class="topbar">
+    <a class="topbar-brand" href="https://essential-apps.com/" target="_blank" rel="noopener noreferrer" title="Essential Apps">
+      <span class="topbar-brand-mark">Essential</span>
+      <span class="topbar-brand-text">Apps</span>
+      <span class="topbar-brand-divider" aria-hidden="true"></span>
+      <span class="topbar-brand-sub">Support</span>
+    </a>
+    <div class="topbar-search-wrap">
+      <input
+        type="text"
+        id="global-search"
+        placeholder="Search snippets, issues, fixes…"
+        autocomplete="off"
+      >
+      <div id="global-search-results"></div>
+    </div>
+    <button class="copy-package-btn" id="copy-full-package" type="button">
+      Copy full package
+    </button>
+  </header>
+
+  <!-- ===== LAYOUT ===== -->
+  <div class="layout">
+
+    <!-- ===== SIDEBAR: App List ===== -->
+    <nav class="sidebar">
+      <div class="sidebar-header">Apps</div>
+      <ul id="app-list">
+        <!-- Rendered by app.js -->
+      </ul>
+      <form class="sidebar-add-form" id="add-app-form">
+        <label for="new-app-name">Add app</label>
+        <input id="new-app-name" type="text" placeholder="App name" autocomplete="off">
+        <button type="submit" class="btn-secondary">Add</button>
+      </form>
+    </nav>
+
+    <!-- ===== MAIN PANEL ===== -->
+    <main class="main-panel" id="main-panel">
+
+      <!-- Tab Bar -->
+      <div class="tab-bar">
+        <button class="tab-btn" data-tab="workflow" type="button">Workflow</button>
+        <button class="tab-btn" data-tab="tickets" type="button">Ticket references</button>
+        <button class="tab-btn active" data-tab="snippets" type="button">Snippets</button>
+        <button class="tab-btn" data-tab="macros" type="button">Reply templates</button>
+        <button class="tab-btn" data-tab="notes" type="button">Updates</button>
+      </div>
+
+      <!-- ===== TAB: Workflow ===== -->
+      <div class="tab-panel" id="tab-workflow">
+
+        <!-- App Header + Issue Selector -->
+        <div class="card full-width workflow-intro">
+          <div id="app-header">
+            <p class="placeholder-msg">Select an app from the sidebar to get started.</p>
+          </div>
+          <div id="issue-selector" class="issue-selector-wrap">
+            <!-- Rendered by app.js after app is selected -->
+          </div>
+          <div id="feature-request-panel" class="feature-request-panel" hidden>
+            <!-- Rendered by app.js when Feature Request is selected -->
+          </div>
+        </div>
+
+        <!-- Two-column grid for the rest of workflow -->
+        <div class="workflow-grid">
+
+          <!-- LEFT: Access + Checklist -->
+          <div class="workflow-col">
+
+            <!-- Required Access -->
+            <div class="card" id="access-panel">
+              <!-- Rendered by app.js -->
+            </div>
+
+            <!-- Issue Detail: causes + checklist + console + reply -->
+            <div class="card" id="issue-detail">
+              <p class="placeholder-msg">Select an issue to see the investigation guide.</p>
+            </div>
+
+            <div class="card storefront-scanner-card" id="storefront-scanner">
+              <div class="section-header">
+                <div>
+                  <h3>Storefront Scanner</h3>
+                  <p class="scanner-intro">Copy the read-only scanner, run it in the merchant storefront Console, then paste the JSON report here.</p>
+                </div>
+                <div class="scanner-header-actions">
+                  <button class="btn-icon scanner-refresh-btn" id="refresh-scanner-panel" type="button" title="Refresh scanner analysis" aria-label="Refresh scanner analysis">&#8635;</button>
+                  <button class="btn-copy btn-sm" id="copy-scanner-script" type="button">Copy Storefront Scanner</button>
+                </div>
+              </div>
+
+              <details class="scanner-preview">
+                <summary>Scanner script preview</summary>
+                <pre class="code-block" id="scanner-script-preview"></pre>
+              </details>
+
+              <label class="scanner-label" for="scanner-json-input">Paste scanner JSON report here</label>
+              <textarea
+                class="scanner-json-area"
+                id="scanner-json-input"
+                placeholder='Paste the scanner JSON report here...'
+              ></textarea>
+
+              <div class="scanner-actions">
+                <button class="btn-secondary" id="analyze-scanner-report" type="button">Analyze Scanner Report</button>
+                <button class="btn-secondary" id="copy-diagnostic-summary" type="button">Copy Diagnostic Summary</button>
+                <button class="btn-secondary" id="copy-troubleshooting-package" type="button">Copy Full Troubleshooting Package</button>
+              </div>
+
+              <div class="scanner-results" id="scanner-results">
+                <p class="placeholder-msg">Paste a scanner report and analyze it to see likely cause, evidence, next steps, snippets, reply angle, internal note, and escalation guidance.</p>
+              </div>
+            </div>
+
+          </div>
+
+          <!-- RIGHT: Snippets relevant to selected app -->
+          <div class="workflow-col">
+            <div class="card">
+              <div class="section-header">
+                <h3>Related Snippets</h3>
+              </div>
+              <div id="workflow-snippets">
+                <p class="placeholder-msg">Select an app to see related snippets.</p>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+      <!-- /tab-workflow -->
+
+      <!-- ===== TAB: Ticket References ===== -->
+      <div class="tab-panel" id="tab-tickets">
+        <div class="reference-layout">
+          <div class="reference-header">
+            <div>
+              <h2>Ticket references</h2>
+              <p>Search stored support examples by app, issue, tags, customer wording, and resolution.</p>
+            </div>
+            <button type="button" class="btn-secondary" data-open-modal="ticket-modal">Add Ticket</button>
+          </div>
+          <div class="reference-controls">
+            <input
+              type="text"
+              id="ticket-search"
+              placeholder="Search ticket examples..."
+              autocomplete="off"
+            >
+            <select id="ticket-filter-app">
+              <option value="all">All Apps</option>
+            </select>
+            <select id="ticket-filter-issue">
+              <option value="all">All Issues</option>
+            </select>
+          </div>
+          <div id="ticket-results">
+            <!-- Rendered by app.js -->
+          </div>
+        </div>
+      </div>
+      <!-- /tab-tickets -->
+
+      <!-- ===== TAB: Snippet Library ===== -->
+      <div class="tab-panel active" id="tab-snippets">
+        <div class="snippets-controls">
+          <input
+            type="text"
+            id="snippet-search"
+            placeholder="Search snippets by name, tag, or code…"
+            autocomplete="off"
+          >
+          <select id="filter-app">
+            <option value="all">All Apps</option>
+            <!-- Populated by app.js -->
+          </select>
+          <select id="filter-type">
+            <option value="all">All Types</option>
+            <option value="console">Console</option>
+            <option value="css">CSS</option>
+            <option value="js">JS</option>
+            <option value="liquid">Liquid</option>
+            <option value="class">Class</option>
+          </select>
+        </div>
+        <div id="snippets-body">
+          <!-- Rendered by app.js -->
+        </div>
+      </div>
+      <!-- /tab-snippets -->
+
+      <!-- ===== TAB: Reply Templates ===== -->
+      <div class="tab-panel" id="tab-macros">
+        <div class="snippets-controls macro-controls">
+          <input
+            type="text"
+            id="macro-search"
+            placeholder="Search reply templates..."
+            autocomplete="off"
+          >
+          <select id="macro-filter">
+            <option value="all">All Replies</option>
+            <option value="access">Access</option>
+            <option value="setup">Setup</option>
+            <option value="conflict">Conflict</option>
+            <option value="billing">Billing</option>
+            <option value="feature">Feature Request</option>
+            <option value="review">Review Request</option>
+          </select>
+        </div>
+        <div id="macro-list">
+          <!-- Rendered by app.js -->
+        </div>
+      </div>
+      <!-- /tab-macros -->
+
+      <!-- ===== TAB: Updates ===== -->
+      <div class="tab-panel" id="tab-notes">
+        <div class="reference-layout">
+          <div class="reference-header">
+            <div>
+              <h2>Updates</h2>
+              <p>Store internal updates and assign each one to a Shopify app.</p>
+            </div>
+            <button type="button" class="btn-secondary" data-open-modal="update-modal">Add Update</button>
+          </div>
+          <div class="reference-controls updates-controls">
+            <select id="update-filter-app">
+              <option value="all">All Apps</option>
+            </select>
+          </div>
+          <div id="updates-list">
+            <!-- Rendered by app.js -->
+          </div>
+        </div>
+        <div class="card legacy-notes-card">
+          <div class="section-header">
+            <h3>Internal Notes</h3>
+          </div>
+          <p class="notes-intro">
+            Jot down what you tried and what you found. Notes stay in this tab only until you refresh.
+            Use <strong>Copy full package</strong> to include them in a troubleshooting summary.
+          </p>
+          <textarea
+            class="notes-area"
+            id="internal-notes"
+            placeholder="Add your notes here… what have you tried? What did you find? Any escalation details?"
+          ></textarea>
+          <div class="notes-actions">
+            <button class="btn-secondary" id="copy-notes">Copy Notes</button>
+            <button class="btn-secondary" id="clear-notes">Clear Notes</button>
+          </div>
+        </div>
+      </div>
+      <!-- /tab-notes -->
+
+    </main>
+    <!-- /main-panel -->
+
+  </div>
+  <!-- /layout -->
+
+  <div class="modal-backdrop" id="ticket-modal" hidden>
+    <div class="modal-dialog" role="dialog" aria-modal="true" aria-labelledby="ticket-modal-title">
+      <div class="modal-header">
+        <h2 id="ticket-modal-title">Add ticket reference</h2>
+        <button type="button" class="modal-close" data-close-modal aria-label="Close">×</button>
+      </div>
+      <form class="entry-form modal-form" id="add-ticket-form">
+        <div class="form-grid">
+          <input id="new-ticket-title" type="text" placeholder="Ticket title" required>
+          <input id="new-ticket-tags" type="text" placeholder="Tags, comma separated">
+          <select id="new-ticket-app" required></select>
+          <select id="new-ticket-issue" required></select>
+        </div>
+        <textarea id="new-ticket-summary" placeholder="Customer wording / summary" required></textarea>
+        <textarea id="new-ticket-diagnosis" placeholder="Diagnosis" required></textarea>
+        <textarea id="new-ticket-resolution" placeholder="Resolution" required></textarea>
+        <textarea id="new-ticket-reply" placeholder="Copy-ready reply" required></textarea>
+        <button type="submit" class="btn-secondary">Add Ticket</button>
+      </form>
+    </div>
+  </div>
+
+  <div class="modal-backdrop" id="update-modal" hidden>
+    <div class="modal-dialog" role="dialog" aria-modal="true" aria-labelledby="update-modal-title">
+      <div class="modal-header">
+        <h2 id="update-modal-title">Add update</h2>
+        <button type="button" class="modal-close" data-close-modal aria-label="Close">×</button>
+      </div>
+      <form class="entry-form modal-form" id="add-update-form">
+        <div class="form-grid">
+          <input id="new-update-title" type="text" placeholder="Update title" required>
+          <select id="new-update-app" required></select>
+        </div>
+        <textarea id="new-update-body" placeholder="What changed, what agents need to know, and next action" required></textarea>
+        <button type="submit" class="btn-secondary">Add Update</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- ===== DATA FILES ===== -->
+  <script src="data/apps.js"></script>
+  <script src="data/issues.js"></script>
+  <script src="data/checklists.js"></script>
+  <script src="data/snippets.js"></script>
+  <script src="data/macros.js"></script>
+  <script src="data/tickets.js"></script>
+  <script src="data/scannerScripts.js"></script>
+  <script src="data/diagnosticRules.js"></script>
+
+  <!-- ===== MAIN APP ===== -->
+  <script src="app.js"></script>
+
+</body>
+</html>
