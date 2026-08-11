@@ -155,6 +155,7 @@ Still manual until you type or paste them:
 ```
 essential-shopify-support-dashboard/
   index.html        ← Open this in your browser
+  favicon.svg       ← Browser-tab icon
   styles.css        ← All styles
   app.js            ← All UI logic
   data/
