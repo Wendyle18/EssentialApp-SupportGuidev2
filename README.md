@@ -26,6 +26,8 @@ Internal support tool for the Essential Apps support team. Shopify only.
 
 Case Triage is browser-local and deterministic. It does not send merchant data to an API, edit Shopify data, or synchronize with HelpScout, Slack, or Savio. Savio and Help Center buttons open the authoritative sources in a separate tab.
 
+The app-specific Related Snippets card and Generated Case Outputs section are collapsible to keep the workflow compact.
+
 Locally added apps, ticket references, and updates are stored in this browser using `localStorage`. They are not written back to `/data/*.js`. Use **Add Ticket** and **Add Update** to add records in modals; custom apps also show these actions in the Workflow tab.
 
 ## How to Edit Content
