@@ -106,20 +106,6 @@
     return map[issue.status] || 'configuration';
   }
 
-  function caseStatusForIssue(issue) {
-    if (!issue) return 'Needs merchant information';
-    if (issue.id === 'feature-request') return 'Feature request logged';
-    var map = {
-      setup: 'Configuration guidance',
-      theme: 'Needs access',
-      conflict: 'Engineering investigation',
-      'shopify-limit': 'Known limitation',
-      'needs-dev': 'Engineering investigation',
-      'needs-access': 'Needs access'
-    };
-    return map[issue.status] || 'Needs merchant information';
-  }
-
   function getCaseData() {
     var app = getApp(context.appId);
     var issue = getIssue(context.issueId);
@@ -136,10 +122,7 @@
       browserDevice: getValue('case-browser-device'),
       themeApps: getValue('case-theme-apps'),
       accessStatus: getValue('case-access-status') || 'Unknown',
-      rootCause: getValue('case-root-cause') || rootCauseForIssue(issue),
-      severity: getValue('case-severity') || 'Medium',
-      confidence: getValue('case-confidence') || 'Medium',
-      caseStatus: getValue('case-status') || caseStatusForIssue(issue),
+      rootCause: rootCauseForIssue(issue),
       troubleshooting: lines(getValue('case-troubleshooting')),
       suppliedEvidence: lines(getValue('case-evidence'))
     };
@@ -171,10 +154,6 @@
       'Browser/device: ' + (data.browserDevice || 'Not provided'),
       'Theme/related apps: ' + (data.themeApps || 'Not provided'),
       'Collaborator access: ' + data.accessStatus,
-      'Likely category: ' + getRootCauseLabel(data.rootCause),
-      'Severity: ' + data.severity,
-      'Confidence: ' + data.confidence,
-      'Case status: ' + data.caseStatus,
       '',
       'Troubleshooting completed:',
       bullets(data.troubleshooting),
@@ -190,9 +169,6 @@
     var missing = getMissingEvidence(data);
     return [
       '=== DIAGNOSIS & NEXT CHECKS ===',
-      'Likely category: ' + getRootCauseLabel(data.rootCause),
-      'Confidence: ' + data.confidence,
-      '',
       'Likely causes:',
       bullets(issue ? issue.causes : [], 'Select an issue to load likely causes.'),
       '',
@@ -306,9 +282,6 @@
       'Collaborator access:',
       data.accessStatus,
       '',
-      'Classification:',
-      getRootCauseLabel(data.rootCause) + ' / ' + data.severity + ' severity / ' + data.confidence + ' confidence',
-      '',
       'Request:',
       issue && issue.escalationThreshold
         ? 'Investigate after confirming this threshold: ' + issue.escalationThreshold
@@ -369,28 +342,8 @@
   }
 
   function applyIssueSuggestions() {
-    var issue = getIssue(context.issueId);
-    var rootSelect = el('case-root-cause');
-    var statusSelect = el('case-status');
-    if (rootSelect) rootSelect.value = rootCauseForIssue(issue);
-    if (statusSelect) statusSelect.value = caseStatusForIssue(issue);
     renderSelectedContext();
     renderOutputs();
-  }
-
-  function populateSelects() {
-    var rootSelect = el('case-root-cause');
-    var statusSelect = el('case-status');
-    if (rootSelect) {
-      rootSelect.innerHTML = (window.ESSENTIAL_ROOT_CAUSES || []).map(function (item) {
-        return '<option value="' + item.id + '">' + item.label + '</option>';
-      }).join('');
-    }
-    if (statusSelect) {
-      statusSelect.innerHTML = (window.ESSENTIAL_CASE_STATUSES || []).map(function (item) {
-        return '<option value="' + item + '">' + item + '</option>';
-      }).join('');
-    }
   }
 
   function resetForm() {
@@ -398,7 +351,6 @@
     fields.forEach(function (field) {
       if (field.id === 'case-agent-name') field.value = 'Wendyle';
       else if (field.id === 'case-access-status') field.value = 'Unknown';
-      else if (field.id === 'case-severity' || field.id === 'case-confidence') field.value = 'Medium';
       else if (field.tagName === 'SELECT') field.selectedIndex = 0;
       else field.value = '';
     });
@@ -407,7 +359,6 @@
 
   function init() {
     if (!el('case-triage')) return;
-    populateSelects();
 
     document.querySelectorAll('#case-triage .case-field').forEach(function (field) {
       field.addEventListener('input', scheduleRender);

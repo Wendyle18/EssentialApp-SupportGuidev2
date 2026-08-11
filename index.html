@@ -79,17 +79,18 @@
         </div>
 
         <!-- App-specific snippets kept near the top for fast access -->
-        <section class="card full-width workflow-priority-snippets">
-          <div class="section-header">
+        <details class="card full-width workflow-priority-snippets collapsible-card" open>
+          <summary class="collapsible-card-summary">
             <div>
               <h3>Related Snippets</h3>
               <p>Quick commands and customizations for the selected app.</p>
             </div>
-          </div>
+            <span class="collapse-state" aria-hidden="true"></span>
+          </summary>
           <div id="workflow-snippets">
             <p class="placeholder-msg">Select an app to see related snippets.</p>
           </div>
-        </section>
+        </details>
 
         <!-- Guided case intake and copy-ready outputs -->
         <section class="card full-width case-triage-card" id="case-triage">
@@ -115,7 +116,7 @@
             <label class="case-field-wide">Affected URL / product / order / campaign<input class="case-field" id="case-affected" type="text" placeholder="Paste the relevant identifier or URL" autocomplete="off"></label>
             <label>Browser and device<input class="case-field" id="case-browser-device" type="text" placeholder="Chrome, Safari, mobile…" autocomplete="off"></label>
             <label>Theme and related apps<input class="case-field" id="case-theme-apps" type="text" placeholder="Theme name and integrations" autocomplete="off"></label>
-            <label>Collaborator access
+            <label class="case-field-full">Collaborator access
               <select class="case-field" id="case-access-status">
                 <option value="Unknown">Unknown</option>
                 <option value="Not needed">Not needed</option>
@@ -124,47 +125,39 @@
                 <option value="Unavailable">Unavailable</option>
               </select>
             </label>
-            <label>Root-cause category<select class="case-field" id="case-root-cause"></select></label>
-            <label>Severity
-              <select class="case-field" id="case-severity">
-                <option value="Low">Low</option>
-                <option value="Medium" selected>Medium</option>
-                <option value="High">High</option>
-                <option value="Critical">Critical</option>
-              </select>
-            </label>
-            <label>Confidence
-              <select class="case-field" id="case-confidence">
-                <option value="Low">Low</option>
-                <option value="Medium" selected>Medium</option>
-                <option value="High">High</option>
-              </select>
-            </label>
-            <label>Case status<select class="case-field" id="case-status"></select></label>
             <label class="case-field-wide">Troubleshooting completed<textarea class="case-field" id="case-troubleshooting" placeholder="One completed check per line"></textarea></label>
             <label class="case-field-wide">Screenshots / recordings / evidence<textarea class="case-field" id="case-evidence" placeholder="Paste links or describe the evidence received"></textarea></label>
           </div>
 
           <div class="case-context-strip" id="case-selected-context">Select an app and issue to activate guided recommendations.</div>
 
-          <div class="case-output-grid">
-            <section class="case-output-card">
-              <div class="section-header"><h4>Ticket Summary</h4><button class="btn-copy btn-sm" type="button" data-copy-case-target="case-summary-output">Copy</button></div>
-              <pre id="case-summary-output" class="case-output">Select an app and issue, then add the available ticket context.</pre>
-            </section>
-            <section class="case-output-card">
-              <div class="section-header"><h4>Diagnosis & Next Checks</h4><button class="btn-copy btn-sm" type="button" data-copy-case-target="case-diagnosis-output">Copy</button></div>
-              <pre id="case-diagnosis-output" class="case-output">The suggested category, checks, missing evidence, and escalation threshold will appear here.</pre>
-            </section>
-            <section class="case-output-card">
-              <div class="section-header"><h4>Merchant Response</h4><button class="btn-copy btn-sm" type="button" data-copy-case-target="case-merchant-output">Copy</button></div>
-              <pre id="case-merchant-output" class="case-output">A copy-ready response will appear here.</pre>
-            </section>
-            <section class="case-output-card">
-              <div class="section-header"><h4>Engineering Escalation</h4><button class="btn-copy btn-sm" type="button" data-copy-case-target="case-escalation-output">Copy</button></div>
-              <pre id="case-escalation-output" class="case-output">A complete Slack escalation will appear here.</pre>
-            </section>
-          </div>
+          <details class="case-outputs-collapse" open>
+            <summary class="collapsible-card-summary">
+              <div>
+                <h3>Generated Case Outputs</h3>
+                <p>Copy the complete package or open an individual output below.</p>
+              </div>
+              <span class="collapse-state" aria-hidden="true"></span>
+            </summary>
+            <div class="case-output-grid">
+              <section class="case-output-card">
+                <div class="section-header"><h4>Ticket Summary</h4><button class="btn-copy btn-sm" type="button" data-copy-case-target="case-summary-output">Copy</button></div>
+                <pre id="case-summary-output" class="case-output">Select an app and issue, then add the available ticket context.</pre>
+              </section>
+              <section class="case-output-card">
+                <div class="section-header"><h4>Diagnosis & Next Checks</h4><button class="btn-copy btn-sm" type="button" data-copy-case-target="case-diagnosis-output">Copy</button></div>
+                <pre id="case-diagnosis-output" class="case-output">Checks, missing evidence, and the escalation threshold will appear here.</pre>
+              </section>
+              <section class="case-output-card">
+                <div class="section-header"><h4>Merchant Response</h4><button class="btn-copy btn-sm" type="button" data-copy-case-target="case-merchant-output">Copy</button></div>
+                <pre id="case-merchant-output" class="case-output">A copy-ready response will appear here.</pre>
+              </section>
+              <section class="case-output-card">
+                <div class="section-header"><h4>Engineering Escalation</h4><button class="btn-copy btn-sm" type="button" data-copy-case-target="case-escalation-output">Copy</button></div>
+                <pre id="case-escalation-output" class="case-output">A complete Slack escalation will appear here.</pre>
+              </section>
+            </div>
+          </details>
         </section>
 
         <!-- Two-column grid for the rest of workflow -->
