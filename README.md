@@ -10,8 +10,8 @@ Internal support tool for the Essential Apps support team. Shopify only.
 
 ## How to Use
 
-1. Open the **Snippets** tab (default) to browse all snippets grouped by app.
-2. Click an app in the left sidebar for the investigation workflow.
+1. Open the dashboard; the **Workflow** tab is the default starting point.
+2. Click an app in the left sidebar; its related snippets appear immediately below the app and issue selector.
 3. Select the issue type from the dropdown.
 4. Review likely causes and recommended fixes, then follow the investigation checklist.
 5. Copy the console command, snippets, or reply template as needed.
@@ -19,16 +19,12 @@ Internal support tool for the Essential Apps support team. Shopify only.
 7. Use **Snippets** filters to narrow by app or type.
 8. Use the **Reply templates** tab to browse and copy all macros.
 9. Use the **Updates** tab to store app-assigned internal updates.
-10. Click **Copy full package** (top right) to copy a complete summary including app, issue, access, checklist, commands, reply, and your notes.
-11. Use **Storefront Scanner** in the Workflow tab when storefront evidence is needed:
-    - Select the app and issue.
-    - Copy **Essential Shopify Storefront Scanner**.
-    - Paste it into DevTools Console on the merchant's Shopify storefront.
-    - Copy the generated JSON report, or let the scanner copy it automatically.
-    - Paste the JSON into the dashboard and click **Analyze Scanner Report**.
-    - Copy the diagnostic summary or full troubleshooting package.
+10. Use **Guided Case Triage** to record the merchant, store, expected and actual behavior, affected reference, environment, access, troubleshooting, and evidence.
+11. Review the generated ticket summary, diagnosis, missing evidence, merchant response, and engineering escalation.
+12. For feature requests, open the selected app's filtered Savio view, search before creating a duplicate, and copy the request package.
+13. Click **Copy full package** (top right) to copy the app, issue, access, checklist, reply, notes, and complete case-triage package.
 
-The scanner is read-only. It checks storefront DOM, loaded scripts, safe Shopify globals, Essential globals, placements, visibility, `/cart.js`, and safe cart item summaries. It does not edit theme code, mutate cart contents, call Shopify Admin APIs, or use any Essential internal API.
+Case Triage is browser-local and deterministic. It does not send merchant data to an API, edit Shopify data, or synchronize with HelpScout, Slack, or Savio. Savio and Help Center buttons open the authoritative sources in a separate tab.
 
 Locally added apps, ticket references, and updates are stored in this browser using `localStorage`. They are not written back to `/data/*.js`. Use **Add Ticket** and **Add Update** to add records in modals; custom apps also show these actions in the Workflow tab.
 
@@ -44,8 +40,19 @@ All content lives in `/data/`. Edit these files in any text editor:
 | `data/snippets.js` | CSS, JS, Liquid, console, class snippets |
 | `data/macros.js` | Reply templates with `{{placeholder}}` syntax |
 | `data/tickets.js` | Static sample ticket references for agent lookup |
-| `data/scannerScripts.js` | Read-only copy-paste storefront scanner scripts |
-| `data/diagnosticRules.js` | Data-driven scanner analyzer mappings and rules |
+| `data/playbooks.js` | Case categories, statuses, limitations, internal procedures, Help Center links, aliases, and app-filtered Savio links |
+
+`triage.js` generates browser-local summaries, diagnoses, replies, and engineering escalations. `enhancements.js` contains optional sidebar ordering and update-detail behavior.
+
+## New App Knowledge Sources
+
+- Essential Subscriptions: `https://essentials-docs.helpscoutdocs.com/collection/214-essential-subscriptions-app`
+- Essential Free Gifts & BOGO: `https://essentials-docs.helpscoutdocs.com/collection/249-essential-free-gifts-bogo`
+- Essential Checkout: `https://essentials-docs.helpscoutdocs.com/collection/266-essential-checkout`
+
+The provisional collaborator access lists for these apps are marked for internal confirmation in the UI. Confirm them before sending an access request.
+
+The Workflow knowledge card also contains the feature-request intake, 5-star review attribution, Preorder shop-information, and storefront geolocation procedures from the updated support documentation.
 
 Each file has comments explaining how to add new entries.
 
@@ -127,6 +134,7 @@ Do not include merchant secrets, passwords, API keys, access tokens, or private 
 ## Reply Template Placeholders
 
 Templates use `{{placeholder}}` syntax. These fill in automatically when you select an app and issue:
+- `{{agent_name}}` — value entered in Guided Case Triage
 - `{{app_name}}` — selected app name from the sidebar
 - `{{issue_summary}}` — selected issue label from the dropdown
 - `{{required_access}}` — collaborator permissions for the selected app
@@ -154,8 +162,9 @@ essential-shopify-support-dashboard/
     snippets.js     ← CSS, JS, Liquid, console snippets
     macros.js       ← Reply templates
     tickets.js      ← Sample ticket references
-    scannerScripts.js
-    diagnosticRules.js
+    playbooks.js    ← Case categories, resources, limitations, procedures
+  triage.js         ← Guided case generation
+  enhancements.js  ← Sidebar ordering and update detail UI
   README.md
   AGENTS.md
 ```
