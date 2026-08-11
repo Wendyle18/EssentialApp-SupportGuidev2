@@ -165,9 +165,77 @@ window.ESSENTIAL_CHECKLISTS = {
   'feature-request': [
     'Confirm the feature does not already exist in a different part of the app',
     'Note the exact merchant use case and what they are trying to achieve',
+    'Search the selected app in Savio before creating a duplicate request',
+    'If found, add the merchant evidence to the existing request and note its current status',
+    'If not found, copy the Savio-ready request package and create a new request',
     'Send the Feature Request reply template',
-    'Log the request internally for product team review',
     'Do not promise a timeline or guarantee the feature will be built'
+  ],
+
+  'subscriptions-widget': [
+    'Confirm the Essential Subscriptions app embed is enabled in the active theme and saved',
+    'Confirm the subscription campaign is Published, not Unpublished',
+    'Confirm the tested product or variant is assigned to the campaign',
+    'Review delivery, billing, pricing, and purchase-option settings',
+    'Test the affected product in an incognito storefront session',
+    'Record the product URL, campaign name, active theme, and storefront result'
+  ],
+
+  'subscriptions-portal': [
+    'Confirm whether the store uses new or legacy customer accounts',
+    'Confirm the Essential Subscriptions extension was added in Checkout and accounts editor',
+    'Confirm the editor changes were saved and setup was marked complete in the app',
+    'Place or identify a valid subscription test order',
+    'Open the customer account and confirm the subscription and management actions appear',
+    'Collect the customer-account URL, order number, and screenshots before escalating'
+  ],
+
+  'subscriptions-management': [
+    'Identify the subscription, order, customer, email event, or analytics period involved',
+    'Confirm the subscription status and relevant event date',
+    'Review notification toggles, timing, billing, inventory, or date-range settings as applicable',
+    'Compare expected totals or behavior with specific subscription records',
+    'Collect reproducible identifiers and screenshots before escalating'
+  ],
+
+  'free-gifts-widget': [
+    'Confirm the Essential Free Gifts app embed is enabled and saved',
+    'Confirm the required placement is published separately',
+    'Confirm the offer is Active rather than Scheduled, Expired, or Deactivated',
+    'Confirm page targeting includes the affected URL',
+    'Confirm the current Shopify Market is included',
+    'Check the dashboard for overlapping-offer warnings',
+    'Test the affected placement on desktop and mobile in an incognito session'
+  ],
+
+  'free-gifts-offer': [
+    'Identify whether the offer is BXGY, BOGO, or Spend X Get Gift',
+    'Build a fresh cart that exactly meets the trigger product, quantity, or value condition',
+    'Confirm one-time versus subscription purchase targeting',
+    'Review gift products, variants, gift limit, max uses, and automatic/manual adding',
+    'Check excluded products, market-specific thresholds, schedule, and customer targeting',
+    'Test the locked, unlocked, and added states with the Design preview',
+    'Collect the cart state, offer settings, and storefront recording before escalating'
+  ],
+
+  'checkout-rule': [
+    'Confirm the rule Status is Active and the latest changes were saved',
+    'Confirm the app displayed Function published after saving',
+    'Read the plain-language rule summary and build a cart that clearly matches it',
+    'Check AND conditions within groups and OR behavior across groups',
+    'Test the live checkout in incognito or with a draft order',
+    'Review other active rules for overlapping delivery or payment effects',
+    'Collect the rule summary, test cart, checkout recording, and exact method labels'
+  ],
+
+  'checkout-validation': [
+    'Confirm the validation has at least one complete condition',
+    'Confirm the rule is Active, saved, and published',
+    'Check whether it runs during field interaction, checkout completion, or both',
+    'Temporarily move the message to the top of checkout while testing',
+    'Confirm whether the fallback is fail open or fail closed',
+    'Test one matching cart and one non-matching cart',
+    'Collect a full checkout recording and the rule configuration before escalating'
   ]
 
   // TODO: Add checklists for new issue types as they are added

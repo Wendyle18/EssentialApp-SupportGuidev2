@@ -1399,6 +1399,407 @@ window.ESSENTIAL_ISSUES = [
     ],
     checklistId: 'not-showing',
     macroId: 'needs-collab-access'
+  },
+
+  // --- Essential Subscriptions ------------------------------
+  {
+    id: 'subscriptions-widget-not-showing',
+    label: 'Subscription Widget Not Showing',
+    appIds: ['essential-subscriptions'],
+    status: 'setup',
+    rootCause: 'configuration',
+    causes: [
+      'Essential Subscriptions app embed is disabled in the active theme',
+      'Subscription campaign is unpublished or has unsaved changes',
+      'The tested product or variant is not assigned to the campaign',
+      'Merchant is testing a different theme or product than the configured one'
+    ],
+    fixes: [
+      'Enable the Essential Subscriptions app embed and save the active theme',
+      'Publish the campaign and confirm the product or variant assignment',
+      'Test the assigned product in an incognito storefront session',
+      'Compare the live storefront with the campaign preview'
+    ],
+    evidenceNeeded: ['Affected product URL', 'Campaign name and status', 'Active theme name', 'Screenshot of the product assignment'],
+    escalationThreshold: 'Escalate only when the embed is enabled, the campaign is published, the product is assigned, and the widget still does not render.',
+    sourceTitle: 'Getting started with Essential Subscriptions',
+    sourceUrl: 'https://essentials-docs.helpscoutdocs.com/article/218-getting-started-with-essential-subscriptions',
+    checklistId: 'subscriptions-widget',
+    macroId: 'app-embed-not-enabled'
+  },
+  {
+    id: 'subscriptions-campaign-setup',
+    label: 'Subscription Campaign Setup Question',
+    appIds: ['essential-subscriptions'],
+    status: 'setup',
+    rootCause: 'configuration',
+    causes: [
+      'Campaign is still unpublished',
+      'Delivery and billing frequencies are incompatible',
+      'A product or variant was not assigned',
+      'One-time purchase or subscription option settings do not match the expected offer'
+    ],
+    fixes: [
+      'Confirm product assignment, delivery policy, billing policy, pricing, and option settings',
+      'Save and publish after reviewing the live preview',
+      'Use a test product before rolling the campaign out broadly'
+    ],
+    evidenceNeeded: ['Campaign screenshot', 'Expected cadence and pricing', 'Affected product or variant'],
+    escalationThreshold: 'Treat unsupported campaign behavior as a limitation or feature request; escalate only when valid saved values do not persist or calculate correctly.',
+    sourceTitle: 'Create a Subscription app Campaign',
+    sourceUrl: 'https://essentials-docs.helpscoutdocs.com/article/219-create-subscription-campaign',
+    checklistId: 'subscriptions-widget',
+    macroId: 'needs-collab-access'
+  },
+  {
+    id: 'subscriptions-customer-portal',
+    label: 'Customer Portal Not Working',
+    appIds: ['essential-subscriptions'],
+    status: 'setup',
+    rootCause: 'configuration',
+    causes: [
+      'The Essential Subscriptions customer-account extension was not added or saved',
+      'The setup confirmation was not completed in the app',
+      'The store uses legacy customer accounts and needs a custom setup',
+      'The test customer does not have a subscription order'
+    ],
+    fixes: [
+      'Add the app extension in the Checkout and accounts editor and save it',
+      'Place a subscription test order and confirm management options appear',
+      'Use the generated customer portal link after setup is complete',
+      'Request support review for legacy customer accounts'
+    ],
+    evidenceNeeded: ['Customer-account type', 'Test order number', 'Portal screenshot', 'Customer portal URL'],
+    escalationThreshold: 'Escalate when the extension is saved on new customer accounts and a valid subscription still does not appear.',
+    sourceTitle: 'Set up the Subscriptions customer portal',
+    sourceUrl: 'https://essentials-docs.helpscoutdocs.com/article/221-setup-customer-portal',
+    checklistId: 'subscriptions-portal',
+    macroId: 'needs-collab-access'
+  },
+  {
+    id: 'subscriptions-notification-email',
+    label: 'Subscription Notification Email Issue',
+    appIds: ['essential-subscriptions'],
+    status: 'setup',
+    rootCause: 'configuration',
+    causes: [
+      'The relevant notification type is disabled',
+      'The merchant expects the Essential email to replace Shopify order confirmation',
+      'Reminder timing or customized wording is incorrect',
+      'The sender address has not been configured or verified'
+    ],
+    fixes: [
+      'Check Settings > Email notifications to customers and enable the correct event',
+      'Send a test email before testing a live subscription event',
+      'Confirm charge reminder timing and sender configuration',
+      'Explain that the new-subscription email is additional to Shopify order confirmation'
+    ],
+    evidenceNeeded: ['Notification type', 'Subscription or order identifier', 'Recipient email', 'Expected send time'],
+    escalationThreshold: 'Escalate when an enabled notification fails for a reproducible qualifying event and the recipient details are valid.',
+    sourceTitle: 'Subscriptions app Customer Notification Emails',
+    sourceUrl: 'https://essentials-docs.helpscoutdocs.com/article/224-customer-notification-emails',
+    checklistId: 'subscriptions-management',
+    macroId: 'needs-collab-access'
+  },
+  {
+    id: 'subscriptions-analytics-discrepancy',
+    label: 'Subscription Analytics Discrepancy',
+    appIds: ['essential-subscriptions'],
+    status: 'needs-dev',
+    rootCause: 'app-bug',
+    causes: [
+      'Date range or previous-period comparison is misunderstood',
+      'Paused, cancelled, or expired subscriptions are excluded from active totals',
+      'The reported order or subscription falls outside the selected range',
+      'A genuine MRR or subscription-count calculation issue exists'
+    ],
+    fixes: [
+      'Match the Analytics date range to the subscription creation and billing dates',
+      'Separate active subscriptions from paused, cancelled, and expired records',
+      'Collect sample subscription IDs before escalation'
+    ],
+    evidenceNeeded: ['Selected date range', 'Sample subscription IDs', 'Expected and displayed totals', 'Screenshots of the analytics and subscription records'],
+    escalationThreshold: 'Escalate with sample IDs when the same qualifying subscriptions produce a reproducible total mismatch.',
+    sourceTitle: 'Subscription app Analytics',
+    sourceUrl: 'https://essentials-docs.helpscoutdocs.com/article/228-subscription-analytics',
+    checklistId: 'subscriptions-management',
+    macroId: 'needs-collab-access'
+  },
+  {
+    id: 'subscriptions-upsell-not-showing',
+    label: 'Subscription Upsell Not Showing',
+    appIds: ['essential-subscriptions'],
+    status: 'setup',
+    rootCause: 'configuration',
+    causes: [
+      'The source subscription campaign or Upsell integration is not configured',
+      'The target product is not eligible for a subscription offer',
+      'The related app embed or placement is missing'
+    ],
+    fixes: [
+      'Confirm the product has a published subscription campaign',
+      'Review the Upsell offer assignment and placement',
+      'Test the product and offer in an incognito storefront session'
+    ],
+    evidenceNeeded: ['Source product URL', 'Subscription campaign', 'Upsell offer name', 'Storefront recording'],
+    escalationThreshold: 'Escalate after both published configurations and their product assignments are confirmed.',
+    sourceTitle: 'Show Subscriptions as an Upsell',
+    sourceUrl: 'https://essentials-docs.helpscoutdocs.com/article/269-show-subscription-as-upsell',
+    checklistId: 'subscriptions-widget',
+    macroId: 'needs-collab-access'
+  },
+
+  // --- Essential Free Gifts & BOGO --------------------------
+  {
+    id: 'free-gifts-widget-not-showing',
+    label: 'Free Gifts Widget Not Showing',
+    appIds: ['essential-free-gifts-bogo'],
+    status: 'setup',
+    rootCause: 'configuration',
+    causes: [
+      'App embed is disabled',
+      'The selected placement is enabled but not published',
+      'Offer is scheduled, expired, or excludes the current market',
+      'Page targeting does not include the tested page',
+      'Overlapping offers share trigger products'
+    ],
+    fixes: [
+      'Enable the Essential Free Gifts app embed and save the active theme',
+      'Publish each required placement separately',
+      'Confirm schedule, market, page targeting, and offer conditions',
+      'Resolve warnings for overlapping offers'
+    ],
+    evidenceNeeded: ['Offer name and status', 'Placement and publish state', 'Affected URL', 'Current market', 'Cart contents'],
+    escalationThreshold: 'Escalate after all seven documented visibility checks pass and the widget still does not render.',
+    sourceTitle: 'Troubleshooting: Widget Not Showing',
+    sourceUrl: 'https://essentials-docs.helpscoutdocs.com/article/264-troubleshooting-widget-not-showing',
+    checklistId: 'free-gifts-widget',
+    macroId: 'app-embed-not-enabled'
+  },
+  {
+    id: 'free-gifts-offer-not-triggering',
+    label: 'Gift Offer Not Triggering',
+    appIds: ['essential-free-gifts-bogo'],
+    status: 'setup',
+    rootCause: 'configuration',
+    causes: [
+      'Trigger product, quantity, or cart threshold is not met',
+      'The offer targets one-time or subscription purchases differently',
+      'Gift limit forces manual adding but the merchant expects automatic adding',
+      'Excluded products do not count toward a Spend X threshold',
+      'Market-specific threshold differs from the default threshold'
+    ],
+    fixes: [
+      'Build a cart that exactly meets the trigger conditions',
+      'Confirm purchase type, gift products, variants, gift limit, and max uses',
+      'Check product exclusions and the active market threshold',
+      'Use Preview to inspect locked, unlocked, and added states'
+    ],
+    evidenceNeeded: ['Offer type', 'Trigger and gift products', 'Cart JSON or screenshot', 'Active market', 'Automatic or manual gift mode'],
+    escalationThreshold: 'Escalate when a reproducible cart meets every published condition but the reward state does not change.',
+    sourceTitle: 'Offer Types and Setup',
+    sourceUrl: 'https://essentials-docs.helpscoutdocs.com/article/258-offer-types',
+    checklistId: 'free-gifts-offer',
+    macroId: 'needs-collab-access'
+  },
+  {
+    id: 'free-gifts-scheduling-market',
+    label: 'Gift Scheduling or Market Targeting Issue',
+    appIds: ['essential-free-gifts-bogo'],
+    status: 'setup',
+    rootCause: 'configuration',
+    causes: [
+      'Start date has not arrived or end date has passed',
+      'Offer targets a different Shopify Market',
+      'Spend X threshold uses a market-specific value',
+      'Customer targeting does not match the test customer'
+    ],
+    fixes: [
+      'Check Active, Scheduled, Expired, or Deactivated status',
+      'Confirm the current Shopify Market and its custom minimum value',
+      'Test signed-out, new-customer, and returning-customer states as applicable'
+    ],
+    evidenceNeeded: ['Schedule and timezone', 'Market settings', 'Detected market', 'Customer login/order history state'],
+    escalationThreshold: 'Escalate only when the current time, market, threshold, and customer type all match the published configuration.',
+    sourceTitle: 'Scheduling, Markets and Customer Targeting',
+    sourceUrl: 'https://essentials-docs.helpscoutdocs.com/article/262-scheduling-and-markets',
+    checklistId: 'free-gifts-offer',
+    macroId: 'needs-collab-access'
+  },
+  {
+    id: 'free-gifts-placement-design',
+    label: 'Gift Widget Placement or Design Issue',
+    appIds: ['essential-free-gifts-bogo'],
+    status: 'theme',
+    rootCause: 'theme-conflict',
+    causes: [
+      'The placement is unpublished or targets a different page',
+      'Cart, product, floating, and announcement placements have independent settings',
+      'Theme layout or cart structure conflicts with the chosen position',
+      'The merchant expects one placement design to apply to every placement'
+    ],
+    fixes: [
+      'Confirm the placement type, page targeting, position, and publish state',
+      'Review each placement design independently',
+      'Use the supported app block for a custom product-page position',
+      'Test mobile and desktop layouts'
+    ],
+    evidenceNeeded: ['Placement type', 'Affected URL', 'Desired position', 'Desktop and mobile screenshots'],
+    escalationThreshold: 'Escalate only after the supported placement is published and a theme-specific conflict is reproduced.',
+    sourceTitle: 'Widget Placements and Design',
+    sourceUrl: 'https://essentials-docs.helpscoutdocs.com/article/261-widget-placements-and-design',
+    checklistId: 'free-gifts-widget',
+    macroId: 'needs-collab-access'
+  },
+  {
+    id: 'free-gifts-discount-conflict',
+    label: 'Gift or Discount Conflict',
+    appIds: ['essential-free-gifts-bogo'],
+    status: 'conflict',
+    rootCause: 'theme-conflict',
+    causes: [
+      'Another discount or gift app changes the same cart line',
+      'Shopify discount-combination rules override the intended reward',
+      'Overlapping Essential offers share trigger products',
+      'A stale cart session contains an older discount state'
+    ],
+    fixes: [
+      'Reproduce in a fresh cart with other discount and gift apps disabled',
+      'Check Shopify discount-combination settings',
+      'Resolve overlapping offers and retest one offer at a time',
+      'Collect the exact discount code, cart, and affected order'
+    ],
+    evidenceNeeded: ['Offer names', 'Discount codes', 'Order number', 'Cart screenshot', 'Other promotion apps'],
+    escalationThreshold: 'Escalate when one published offer fails in a clean cart without an overlapping Shopify or third-party discount.',
+    sourceTitle: 'Spend X Get Gift Setup',
+    sourceUrl: 'https://essentials-docs.helpscoutdocs.com/article/260-setting-up-a-spend-x-get-gift-offer',
+    checklistId: 'free-gifts-offer',
+    macroId: 'third-party-conflict'
+  },
+
+  // --- Essential Checkout -----------------------------------
+  {
+    id: 'checkout-rule-not-applying',
+    label: 'Checkout Rule Not Applying',
+    appIds: ['essential-checkout'],
+    status: 'setup',
+    rootCause: 'configuration',
+    causes: [
+      'Rule is Inactive or changes were not saved',
+      'The test cart does not match all conditions in an AND group',
+      'The merchant is not testing the live checkout',
+      'Two active rules overlap and produce an unexpected result'
+    ],
+    fixes: [
+      'Set the rule to Active, save it, and confirm Function published',
+      'Read the rule summary and build a cart that clearly matches it',
+      'Test in incognito or with a draft order',
+      'Review overlapping active rules that affect the same method'
+    ],
+    evidenceNeeded: ['Rule name and type', 'Rule summary screenshot', 'Test cart', 'Checkout recording', 'Active rules list'],
+    escalationThreshold: 'Escalate when an active published rule fails on a clearly matching live checkout and no overlapping rule explains it.',
+    sourceTitle: 'Checkout Troubleshooting and FAQ',
+    sourceUrl: 'https://essentials-docs.helpscoutdocs.com/article/277-troubleshooting-faq',
+    checklistId: 'checkout-rule',
+    macroId: 'needs-collab-access'
+  },
+  {
+    id: 'checkout-validation-not-blocking',
+    label: 'Checkout Validation Not Blocking',
+    appIds: ['essential-checkout'],
+    status: 'setup',
+    rootCause: 'configuration',
+    causes: [
+      'Validation has no complete condition',
+      'The condition is checked only when the customer proceeds to pay',
+      'The message is attached to a field and is easy to miss',
+      'Fail-open behavior allows checkout if the function cannot run'
+    ],
+    fixes: [
+      'Confirm at least one complete condition and activate the rule',
+      'Check both interaction and completion timing when earlier feedback is required',
+      'Temporarily position the message at the top while testing',
+      'Choose fail-open or fail-closed deliberately based on business risk'
+    ],
+    evidenceNeeded: ['Validation type', 'Conditions', 'Message position', 'Check timing', 'Fallback choice', 'Checkout recording'],
+    escalationThreshold: 'Escalate when a published validation with matching conditions and expected timing fails consistently.',
+    sourceTitle: 'Validate and Block Checkout',
+    sourceUrl: 'https://essentials-docs.helpscoutdocs.com/article/275-validate-block-checkout',
+    checklistId: 'checkout-validation',
+    macroId: 'needs-collab-access'
+  },
+  {
+    id: 'checkout-delivery-method-missing',
+    label: 'Delivery Method Missing from Checkout Rule',
+    appIds: ['essential-checkout'],
+    status: 'setup',
+    rootCause: 'configuration',
+    causes: [
+      'The delivery method does not exist in Shopify Shipping and delivery settings',
+      'The carrier rate has a dynamic or unexpected name',
+      'The rule hides every eligible delivery method',
+      'Country, market, type, or cost conditions do not match'
+    ],
+    fixes: [
+      'Add or enable the delivery method in Shopify first',
+      'Use Contains, Starts with, type, or cost matching for dynamic methods',
+      'Keep at least one valid shipping option available',
+      'Test the exact country, market, and cart value'
+    ],
+    evidenceNeeded: ['Shopify delivery settings screenshot', 'Checkout method label', 'Rule effect and conditions', 'Test address'],
+    escalationThreshold: 'Escalate when an existing Shopify delivery method cannot be matched by either exact or supported custom rules.',
+    sourceTitle: 'Delivery Method Customizations',
+    sourceUrl: 'https://essentials-docs.helpscoutdocs.com/article/273-checkout-delivery-customizations',
+    checklistId: 'checkout-rule',
+    macroId: 'needs-collab-access'
+  },
+  {
+    id: 'checkout-payment-method-mismatch',
+    label: 'Payment Method Name or Rule Mismatch',
+    appIds: ['essential-checkout'],
+    status: 'shopify-limit',
+    rootCause: 'shopify-limitation',
+    causes: [
+      'Shopify does not expose live payment gateway labels to the app',
+      'The checkout label differs from the curated payment-method name',
+      'The matching rule is too exact',
+      'The rule hides every eligible payment method'
+    ],
+    fixes: [
+      'Use a custom Contains match for a stable part of the checkout label',
+      'Confirm the exact label in a live checkout',
+      'Keep at least one valid payment option available',
+      'Explain the Shopify gateway-label limitation clearly'
+    ],
+    evidenceNeeded: ['Exact checkout payment label', 'Rule matcher', 'Conditions', 'Checkout screenshot'],
+    escalationThreshold: 'Escalate only when a supported custom text matcher fails against a stable visible checkout label.',
+    sourceTitle: 'Payment Method Customization',
+    sourceUrl: 'https://essentials-docs.helpscoutdocs.com/article/274-checkout-payments-customization',
+    checklistId: 'checkout-rule',
+    macroId: 'shopify-limitation'
+  },
+  {
+    id: 'checkout-rule-type-locked',
+    label: 'Checkout Rule Type Locked or Overlapping',
+    appIds: ['essential-checkout'],
+    status: 'setup',
+    rootCause: 'configuration',
+    causes: [
+      'Customization type is locked while the rule is Active',
+      'Multiple active rules modify the same delivery or payment method',
+      'The merchant expects saving an Inactive rule to affect checkout'
+    ],
+    fixes: [
+      'Set the rule to Inactive and save before changing its type',
+      'Review all active rules and simplify overlaps',
+      'Reactivate and save after the final configuration is tested'
+    ],
+    evidenceNeeded: ['Rules list', 'Affected rule type and status', 'Expected rule order or outcome'],
+    escalationThreshold: 'Escalate when non-overlapping active rules still produce a result inconsistent with their plain-language summaries.',
+    sourceTitle: 'Managing and Publishing Checkout Rules',
+    sourceUrl: 'https://essentials-docs.helpscoutdocs.com/article/276-manage-checkout-rules',
+    checklistId: 'checkout-rule',
+    macroId: 'needs-collab-access'
   }
 
   // TODO: Add more issue types as new patterns emerge

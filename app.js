@@ -27,11 +27,10 @@
     ticketFilterApp: 'all',
     ticketFilterIssue: 'all',
     updateFilterApp: 'all',
+    appSearch: '',
     customApps: [],
     customTickets: [],
-    updates: [],
-    scannerReport: null,
-    scannerAnalysis: null
+    updates: []
   };
 
   // ---- Helpers ----------------------------------------------
@@ -135,6 +134,11 @@
     return getApps().find(function (a) { return a.id === id; }) || null;
   }
 
+  function getAppResource(id) {
+    var resources = window.ESSENTIAL_SUPPORT_RESOURCES || {};
+    return ((resources.apps || {})[id]) || {};
+  }
+
   function isCustomApp(id) {
     return (state.customApps || []).some(function (app) { return app.id === id; });
   }
@@ -230,6 +234,7 @@
     var accessList = app && app.access ? app.access : [];
 
     return {
+      agent_name: (el('case-agent-name') || {}).value || 'Wendyle',
       app_name: app ? app.name : null,
       issue_summary: issue ? issue.label : null,
       required_access: accessList.length
@@ -259,9 +264,20 @@
   // ---- Render: App List -------------------------------------
 
   function renderAppList() {
-    var apps = getApps();
+    var search = (state.appSearch || '').toLowerCase().trim();
+    var apps = getApps().filter(function (app) {
+      if (!search) return true;
+      var resource = getAppResource(app.id);
+      var haystack = [app.name, app.id].concat(resource.aliases || []).join(' ').toLowerCase();
+      return haystack.includes(search);
+    });
     var list = el('app-list');
     if (!list) return;
+
+    if (!apps.length) {
+      list.innerHTML = '<li class="sidebar-empty">No apps match this search.</li>';
+      return;
+    }
 
     list.innerHTML = apps.map(function (app) {
       var active = state.selectedAppId === app.id ? ' active' : '';
@@ -302,6 +318,8 @@
         renderAll();
       });
     });
+
+    document.dispatchEvent(new CustomEvent('essential:ui-rendered'));
   }
 
   // ---- Render: Issue Selector -------------------------------
@@ -343,15 +361,36 @@
       return;
     }
 
-    var savioUrl = 'https://www.savio.io/app/feature-requests?state=ALL_ACTIVE';
+    var app = getApp(state.selectedAppId);
+    var resource = getAppResource(state.selectedAppId);
+    var supportResources = window.ESSENTIAL_SUPPORT_RESOURCES || {};
+    var savioUrl = resource.savioUrl || supportResources.savioAll || 'https://www.savio.io/app/feature-requests?state=ALL_ACTIVE';
+    var createUrl = supportResources.savioCreate || 'https://www.savio.io/app/feature-request/create/?return=/app/feature-requests';
+    var requestPackage = [
+      'App: ' + (app ? app.name : 'Not selected'),
+      'Feature requested: [Describe the requested behavior]',
+      'Merchant use case: [Why the merchant needs it]',
+      'Current limitation: [What is available today]',
+      'Closest workaround: [Supported alternative, if any]',
+      'Affected store / ticket: [Internal reference]',
+      'Evidence: [Screenshots, examples, or frequency]'
+    ].join('\n');
     panel.hidden = false;
     panel.innerHTML =
       '<div class="section-header">' +
-      '<h3>Feature Request Tracker</h3>' +
-      '<button class="btn-copy btn-sm" data-copy-text="' + escapeHtml(savioUrl) + '">Copy Savio link</button>' +
+      '<div><h3>Feature Request Tracker</h3><p class="savio-note">Search before creating a duplicate. Record the use case and workaround without promising a timeline.</p></div>' +
+      '<div class="feature-request-actions">' +
+      '<a class="btn-secondary" href="' + escapeHtml(savioUrl) + '" target="_blank" rel="noopener noreferrer">Search Savio</a>' +
+      '<a class="btn-secondary" href="' + escapeHtml(createUrl) + '" target="_blank" rel="noopener noreferrer">Add New Request</a>' +
+      '<button class="btn-copy btn-sm" data-copy-text="' + escapeHtml(requestPackage) + '">Copy Request Package</button>' +
       '</div>' +
-      '<p class="savio-note">Reference link:</p>' +
-      '<a href="' + escapeHtml(savioUrl) + '" target="_blank" rel="noopener" class="savio-link">' + escapeHtml(savioUrl) + '</a>';
+      '</div>' +
+      '<div class="feature-request-checks">' +
+      '<span>1. Confirm it is not already supported</span>' +
+      '<span>2. Search this app in Savio</span>' +
+      '<span>3. Add evidence to an existing request or create a new one</span>' +
+      '<span>4. Send the no-timeline response</span>' +
+      '</div>';
 
     wireUpCopyButtons(panel);
   }
@@ -368,6 +407,19 @@
       return;
     }
 
+    var resource = getAppResource(app.id);
+    var resourceLinks = '';
+    if (resource.helpCenterUrl || resource.savioUrl) {
+      resourceLinks = '<div class="workflow-resource-links">' +
+        (resource.helpCenterUrl
+          ? '<a class="btn-secondary" href="' + escapeHtml(resource.helpCenterUrl) + '" target="_blank" rel="noopener noreferrer">Open Help Center</a>'
+          : '') +
+        (resource.savioUrl
+          ? '<a class="btn-secondary" href="' + escapeHtml(resource.savioUrl) + '" target="_blank" rel="noopener noreferrer">Search Feature Requests</a>'
+          : '') +
+        '</div>';
+    }
+
     header.innerHTML =
       '<div class="workflow-header-row">' +
       '<div>' +
@@ -376,12 +428,14 @@
         ? '<p>Custom app. Add references or updates below to build its workflow knowledge base.</p>'
         : '') +
       '</div>' +
+      '<div class="workflow-actions">' +
+      resourceLinks +
       (isCustomApp(app.id)
-        ? '<div class="workflow-actions">' +
+        ?
           '<button type="button" class="btn-secondary" data-open-modal="ticket-modal">Add Ticket</button>' +
-          '<button type="button" class="btn-secondary" data-open-modal="update-modal">Add Update</button>' +
-          '</div>'
+          '<button type="button" class="btn-secondary" data-open-modal="update-modal">Add Update</button>'
         : '') +
+      '</div>' +
       '</div>';
   }
 
@@ -410,6 +464,9 @@
       '<h3>Required Collaborator Access</h3>' +
       '<button class="btn-copy btn-sm" data-copy-text="' + escapeHtml(accessText) + '">Copy All</button>' +
       '</div>' +
+      (app.accessConfirmed === false
+        ? '<p class="access-warning"><strong>Permission check:</strong> ' + escapeHtml(app.accessNote || 'Confirm these permissions internally before sending the request.') + '</p>'
+        : '') +
       '<ul class="access-list">' + accessList + '</ul>' +
       '</details>';
 
@@ -455,6 +512,18 @@
       return '[ ] ' + item;
     }).join('\n');
 
+    var evidenceItems = issue.evidenceNeeded || [];
+    var evidenceHtml = evidenceItems.map(function (item) {
+      return '<li>' + escapeHtml(item) + '</li>';
+    }).join('');
+    var evidenceText = evidenceItems.map(function (item) {
+      return '  • ' + item;
+    }).join('\n');
+
+    var sourceHtml = issue.sourceUrl
+      ? '<div class="issue-source">Source: <a href="' + escapeHtml(issue.sourceUrl) + '" target="_blank" rel="noopener noreferrer">' + escapeHtml(issue.sourceTitle || 'Open Help Center article') + '</a></div>'
+      : '';
+
     var macro = getMacro(issue.macroId);
     var macroHtml = '';
     if (macro) {
@@ -495,6 +564,7 @@
       statusChip(issue.status) +
       '<h3>' + escapeHtml(issue.label) + '</h3>' +
       '</div>' +
+      sourceHtml +
 
       '<div class="subsection">' +
       '<h4>Likely Causes</h4>' +
@@ -518,6 +588,20 @@
       '</div>' +
       '<ul class="checklist">' + checklistHtml + '</ul>' +
       '</div>' +
+
+      (evidenceHtml
+        ? '<div class="subsection">' +
+          '<div class="section-header">' +
+          '<h4>Evidence to Collect</h4>' +
+          '<button class="btn-copy btn-sm" data-copy-text="' + escapeHtml(evidenceText) + '">Copy Evidence List</button>' +
+          '</div>' +
+          '<ul class="evidence-list">' + evidenceHtml + '</ul>' +
+          '</div>'
+        : '') +
+
+      (issue.escalationThreshold
+        ? '<div class="subsection escalation-threshold"><h4>Escalation Threshold</h4><p>' + escapeHtml(issue.escalationThreshold) + '</p></div>'
+        : '') +
 
       consoleHtml +
       macroHtml;
@@ -678,6 +762,73 @@
     }).join('');
 
     wireUpCopyButtons(container);
+  }
+
+  function renderWorkflowResources() {
+    var container = el('workflow-resources');
+    if (!container) return;
+    var app = getApp(state.selectedAppId);
+    if (!app) {
+      container.innerHTML = '<p class="placeholder-msg">Select an app to open its Help Center resources and known limitations.</p>';
+      return;
+    }
+
+    var resource = getAppResource(app.id);
+    var articles = resource.articles || [];
+    var limitations = window.ESSENTIAL_KNOWN_LIMITATIONS || [];
+    var procedures = (window.ESSENTIAL_INTERNAL_PROCEDURES || []).filter(function (procedure) {
+      return (procedure.appIds || []).includes('all') || (procedure.appIds || []).includes(app.id);
+    });
+    var relatedCategories = ['Mobile and layout'];
+
+    if (['essential-upsell-cross-sell', 'essential-cart-drawer', 'sticky-atc'].includes(app.id)) {
+      relatedCategories.push('Pricing and cart', 'Checkout and discounts');
+    }
+    if (['essential-free-gifts-bogo', 'essential-checkout', 'rockit-discounts-sales'].includes(app.id)) {
+      relatedCategories.push('Checkout and discounts');
+    }
+    if (app.id === 'essential-loyalty') relatedCategories.push('Loyalty');
+
+    var related = limitations.filter(function (item) {
+      return relatedCategories.includes(item.category);
+    });
+
+    var helpHtml = resource.helpCenterUrl
+      ? '<a class="resource-primary-link" href="' + escapeHtml(resource.helpCenterUrl) + '" target="_blank" rel="noopener noreferrer">Open ' + escapeHtml(app.name) + ' Help Center</a>'
+      : '<p class="placeholder-msg">No Help Center collection is linked yet.</p>';
+
+    var articleHtml = articles.length
+      ? '<div class="resource-link-list">' + articles.map(function (article) {
+        return '<a href="' + escapeHtml(article[1]) + '" target="_blank" rel="noopener noreferrer">' + escapeHtml(article[0]) + '</a>';
+      }).join('') + '</div>'
+      : '';
+
+    var limitationHtml = related.map(function (item) {
+      return '<details class="limitation-item">' +
+        '<summary>' + escapeHtml(item.title) + '</summary>' +
+        '<p>' + escapeHtml(item.summary) + '</p>' +
+        '<p><strong>Supported approach:</strong> ' + escapeHtml(item.workaround) + '</p>' +
+        '</details>';
+    }).join('');
+
+    var procedureHtml = procedures.map(function (procedure) {
+      var steps = (procedure.steps || []).map(function (step) {
+        return '<li>' + escapeHtml(step) + '</li>';
+      }).join('');
+      var links = (procedure.links || []).map(function (link) {
+        return '<a href="' + escapeHtml(link.url) + '" target="_blank" rel="noopener noreferrer">' + escapeHtml(link.label) + '</a>';
+      }).join('');
+      return '<details class="procedure-item">' +
+        '<summary>' + escapeHtml(procedure.title) + '</summary>' +
+        '<p>' + escapeHtml(procedure.summary) + '</p>' +
+        (steps ? '<ol>' + steps + '</ol>' : '') +
+        (links ? '<div class="procedure-links">' + links + '</div>' : '') +
+        '</details>';
+    }).join('');
+
+    container.innerHTML = helpHtml + articleHtml +
+      (procedureHtml ? '<h4 class="resource-subheading">Internal procedures</h4>' + procedureHtml : '') +
+      (limitationHtml ? '<h4 class="resource-subheading">Related known limitations</h4>' + limitationHtml : '');
   }
 
   // ---- Render: Snippet Filters ------------------------------
@@ -857,6 +1008,7 @@
     }).join('');
 
     wireUpCopyButtons(container);
+    document.dispatchEvent(new CustomEvent('essential:ui-rendered'));
   }
 
   // ---- Render: Macro Selector --------------------------------
@@ -922,593 +1074,6 @@
     }).join('');
 
     wireUpCopyButtons(container);
-  }
-
-  // ---- Storefront Scanner -----------------------------------
-
-  function getScannerScript() {
-    return (((window.ESSENTIAL_SCANNER_SCRIPTS || {}).storefront || {}).code) || '';
-  }
-
-  function getDiagnosticRule(id) {
-    return ((window.ESSENTIAL_APP_DIAGNOSTICS || {}).rules || []).find(function (rule) {
-      return rule.id === id;
-    }) || null;
-  }
-
-  function getExpectedGlobals(appId) {
-    return (((window.ESSENTIAL_APP_DIAGNOSTICS || {}).appGlobals || {})[appId]) || [];
-  }
-
-  function getExpectedPlacements(appId) {
-    return (((window.ESSENTIAL_APP_DIAGNOSTICS || {}).appPlacements || {})[appId]) || [];
-  }
-
-  function hasGlobal(report, name) {
-    var info = ((report || {}).essentialGlobals || {})[name];
-    return !!(info && info.exists);
-  }
-
-  function placementCount(report, selector) {
-    var placements = (report || {}).placements || {};
-    return Number(placements[selector] || 0);
-  }
-
-  function expectedPlacementTotal(report, appId) {
-    return getExpectedPlacements(appId).reduce(function (sum, selector) {
-      return sum + placementCount(report, selector);
-    }, 0);
-  }
-
-  function getHiddenEssentialEvidence(report, appId) {
-    var visibility = (report || {}).visibility || {};
-    var expected = getExpectedPlacements(appId);
-    var selectors = expected.length ? expected : Object.keys(visibility).filter(function (selector) {
-      return selector.indexOf('essential') !== -1 || selector.indexOf('rockit') !== -1;
-    });
-
-    return selectors.filter(function (selector) {
-      return (visibility[selector] || []).some(function (item) {
-        return item && item.isProbablyHidden;
-      });
-    }).slice(0, 6);
-  }
-
-  function issueText(issue) {
-    if (!issue) return '';
-    return [
-      issue.id,
-      issue.label,
-      issue.status,
-      (issue.causes || []).join(' '),
-      (issue.fixes || []).join(' ')
-    ].join(' ').toLowerCase();
-  }
-
-  function issueLooksProductPage(issue) {
-    var text = issueText(issue);
-    return /product|add to cart|button|preorder|sticky|upsell|widget|placement/.test(text);
-  }
-
-  function issueLooksDiscount(issue) {
-    return /discount|price|compare|sale|cart/.test(issueText(issue));
-  }
-
-  function issueLooksGreyScreen(issue) {
-    return /grey|gray|loading|blank|network|console/.test(issueText(issue));
-  }
-
-  function issueLooksGeolocation(issue) {
-    return /geo|country|location|market|currency|vpn/.test(issueText(issue));
-  }
-
-  function cartHasDiscounts(report) {
-    var cart = (report || {}).cart || {};
-    if (Number(cart.total_discount || 0) > 0) return true;
-    if (Number(cart.cart_level_discount_applications_count || 0) > 0) return true;
-    return (cart.items || []).some(function (item) {
-      return Number(item.total_discount || 0) > 0 ||
-        Number(item.line_level_discount_allocations_count || 0) > 0;
-    });
-  }
-
-  function cartHasProperty(report, propName) {
-    return (((report || {}).cart || {}).items || []).some(function (item) {
-      return !!item[propName];
-    });
-  }
-
-  function cartHasEssentialPropertyKeys(report) {
-    return (((report || {}).cart || {}).items || []).some(function (item) {
-      return (item.propertyKeys || []).some(function (key) {
-        return /essential/i.test(key);
-      });
-    });
-  }
-
-  function hasEssentialScripts(report) {
-    var scripts = (report || {}).scripts || {};
-    if (Number(scripts.essentialScripts || 0) > 0) return true;
-    return (scripts.items || []).some(function (script) {
-      return !!script.isEssential;
-    });
-  }
-
-  function getRootCauseCategory(rule) {
-    if (rule.category) return rule.category;
-    if (rule.accessNeeded) return 'Needs access';
-    return 'Needs dev team';
-  }
-
-  function getDevEscalationNeeded(rule) {
-    if (typeof rule.devEscalationNeeded === 'boolean') return rule.devEscalationNeeded;
-    return /escalate/i.test(rule.escalation || '');
-  }
-
-  function addDiagnostic(findings, ruleId, evidence) {
-    var rule = getDiagnosticRule(ruleId);
-    if (!rule) return;
-    findings.push({
-      id: rule.id,
-      label: rule.label,
-      confidence: rule.confidence,
-      summary: rule.summary || rule.cause,
-      rootCauseCategory: getRootCauseCategory(rule),
-      cause: rule.cause,
-      evidence: evidence || [],
-      nextSteps: rule.nextSteps || [],
-      suggestedSnippetIds: rule.suggestedSnippetIds || [],
-      merchantAngle: rule.merchantAngle,
-      internalNote: rule.internalNote,
-      escalation: rule.escalation,
-      devEscalationNeeded: getDevEscalationNeeded(rule),
-      accessNeeded: !!rule.accessNeeded
-    });
-  }
-
-  function sortDiagnostics(findings) {
-    var priority = {
-      'missing-global-no-essential-scripts': 10,
-      'missing-global-essential-script-exists': 12,
-      'essential-element-hidden': 15,
-      'preorder-atc-class-missing': 16,
-      'cart-drawer-api-missing': 18,
-      'global-exists-placement-missing': 20,
-      'product-form-missing': 22,
-      'atc-button-missing': 24,
-      'upsell-script-type-issue': 26,
-      'cart-discounts-detected': 30,
-      'upsell-properties-visible': 34,
-      'preorder-properties-visible': 34,
-      'visible-essential-properties': 36,
-      'grey-screen-needs-screenshots': 40,
-      'geolocation-verification': 42,
-      'shopify-limitation': 44,
-      'third-party-conflict': 46,
-      'feature-request-savio': 48
-    };
-
-    findings.sort(function (a, b) {
-      return (priority[a.id] || 100) - (priority[b.id] || 100);
-    });
-  }
-
-  function getSnippet(id) {
-    return (window.ESSENTIAL_SNIPPETS || []).find(function (snippet) {
-      return snippet.id === id;
-    }) || null;
-  }
-
-  function getSuggestedSnippets(appId, issue, finding) {
-    var text = issueText(issue);
-    var byId = {};
-    var snippets = [];
-    var dynamicIds = [];
-
-    (finding.suggestedSnippetIds || []).forEach(function (id) {
-      dynamicIds.push(id);
-    });
-
-    if (finding.id === 'global-exists-placement-missing') {
-      var placementMap = {
-        'essential-upsell-cross-sell': ['placement-upsell-default', 'placement-upsell-side-cart-top', 'placement-upsell-side-cart-bottom', 'placement-upsell-addon'],
-        'essential-countdown-timer': ['placement-countdown-product', 'placement-countdown-by-id'],
-        'essential-announcement-bar': ['placement-announcement-default', 'placement-announcement-side-cart'],
-        'essential-free-shipping': ['placement-free-shipping-side-cart'],
-        'essential-trust-badges-icons': ['placement-trust-badges'],
-        'essential-estimated-delivery': ['placement-estimated-delivery'],
-        'essential-loyalty': ['placement-loyalty-trigger', 'placement-loyalty-product'],
-        'rockit-discounts-sales': ['placement-rockit-timer']
-      };
-      dynamicIds = dynamicIds.concat(placementMap[appId] || []);
-    }
-
-    if (finding.id === 'atc-button-missing' && appId === 'essential-preorder-presale') {
-      dynamicIds = dynamicIds.concat(['class-preorder-initial-atc', 'class-preorder-extra-atc']);
-    }
-
-    dynamicIds.forEach(function (id) {
-      var snippet = getSnippet(id);
-      if (snippet && !byId[snippet.id]) {
-        byId[snippet.id] = true;
-        snippets.push(snippet);
-      }
-    });
-
-    (window.ESSENTIAL_SNIPPETS || []).forEach(function (snippet) {
-      var snippetText = [
-        snippet.label,
-        snippet.description,
-        snippet.type,
-        (snippet.tags || []).join(' ')
-      ].join(' ').toLowerCase();
-      var matches = (snippet.appId === appId || snippet.appId === null) &&
-        text && text.split(/\s+/).some(function (word) {
-          return word.length > 4 && snippetText.indexOf(word) !== -1;
-        });
-      if (matches && !byId[snippet.id] && snippets.length < 5) {
-        byId[snippet.id] = true;
-        snippets.push(snippet);
-      }
-    });
-
-    return snippets.map(function (snippet) {
-      return {
-        id: snippet.id,
-        label: snippet.label,
-        type: typeLabel(snippet.type)
-      };
-    });
-  }
-
-  function analyzeScannerReport(report) {
-    var app = getApp(state.selectedAppId);
-    var issue = getIssue(state.selectedIssueId);
-    var appId = app ? app.id : null;
-    var findings = [];
-    var expectedGlobals = appId ? getExpectedGlobals(appId) : [];
-    var expectedGlobalExists = expectedGlobals.some(function (name) {
-      return hasGlobal(report, name);
-    });
-    var placementTotal = appId ? expectedPlacementTotal(report, appId) : 0;
-    var hiddenSelectors = appId ? getHiddenEssentialEvidence(report, appId) : [];
-    var essentialScriptsFound = hasEssentialScripts(report);
-
-    if (appId && expectedGlobals.length && !expectedGlobalExists) {
-      var globalEvidence = expectedGlobals.map(function (name) {
-        return 'essentialGlobals.' + name + '.exists: false';
-      });
-      globalEvidence.push('scripts.essentialScripts: ' + Number((((report || {}).scripts || {}).essentialScripts) || 0));
-      addDiagnostic(
-        findings,
-        essentialScriptsFound ? 'missing-global-essential-script-exists' : 'missing-global-no-essential-scripts',
-        globalEvidence
-      );
-    }
-
-    if (appId && expectedGlobalExists && getExpectedPlacements(appId).length && placementTotal === 0) {
-      addDiagnostic(findings, 'global-exists-placement-missing', expectedGlobals.filter(function (name) {
-        return hasGlobal(report, name);
-      }).map(function (name) {
-        return 'essentialGlobals.' + name + '.exists: true';
-      }).concat(getExpectedPlacements(appId).map(function (selector) {
-        return 'placements["' + selector + '"]: 0';
-      }).slice(0, 8)));
-    }
-
-    if (appId === 'essential-preorder-presale' && expectedGlobalExists) {
-      var preorderInitialAtc = placementCount(report, '.essential-preorder-initial-add-to-cart-button');
-      var preorderExtraAtc = placementCount(report, '.essential-preorder-extra-add-to-cart-button');
-      if (preorderInitialAtc === 0 && preorderExtraAtc === 0) {
-        addDiagnostic(findings, 'preorder-atc-class-missing', [
-          'essentialGlobals.essentialPreorderConfigs.exists: true',
-          'placements[".essential-preorder-initial-add-to-cart-button"]: 0',
-          'placements[".essential-preorder-extra-add-to-cart-button"]: 0'
-        ]);
-      }
-    }
-
-    if (hiddenSelectors.length) {
-      addDiagnostic(findings, 'essential-element-hidden', hiddenSelectors.map(function (selector) {
-        var sample = (((report || {}).visibility || {})[selector] || [])[0] || {};
-        return selector + ' hidden check: display=' + (sample.display || 'unknown') +
-          ', visibility=' + (sample.visibility || 'unknown') +
-          ', opacity=' + (sample.opacity || 'unknown') +
-          ', size=' + (sample.width || 0) + 'x' + (sample.height || 0);
-      }));
-    }
-
-    if (appId === 'essential-upsell-cross-sell' && ((report.scripts || {}).possibleUpsellScriptTypeIssue)) {
-      addDiagnostic(findings, 'upsell-script-type-issue', ['scripts.possibleUpsellScriptTypeIssue: true']);
-    }
-
-    if (issueLooksDiscount(issue) && cartHasDiscounts(report)) {
-      addDiagnostic(findings, 'cart-discounts-detected', [
-        'cart.total_discount: ' + ((((report || {}).cart || {}).total_discount) || 0),
-        'cart discount applications: ' + ((((report || {}).cart || {}).cart_level_discount_applications_count) || 0)
-      ]);
-    }
-
-    if (cartHasProperty(report, 'hasEssentialUpsellProperties')) {
-      addDiagnostic(findings, 'upsell-properties-visible', ['At least one cart item has Essential Upsell property keys.']);
-    }
-
-    if (cartHasProperty(report, 'hasEssentialPreorderProperties')) {
-      addDiagnostic(findings, 'preorder-properties-visible', ['At least one cart item has preorder property keys.']);
-    }
-
-    if (cartHasEssentialPropertyKeys(report)) {
-      addDiagnostic(findings, 'visible-essential-properties', ['At least one cart item has Essential-related property keys in /cart.js.']);
-    }
-
-    if (appId === 'essential-cart-drawer' && !(((report || {}).cartDrawer || {}).hasEssentialCartApi)) {
-      addDiagnostic(findings, 'cart-drawer-api-missing', ['cartDrawer.hasEssentialCartApi: false']);
-    }
-
-    if (issueLooksProductPage(issue) && (((report || {}).page || {}).likelyPageType || '').indexOf('product') !== -1) {
-      var productFormsFound = Number((((report || {}).page || {}).productFormsFound) || 0);
-      var addToCartButtonsFound = Number((((report || {}).page || {}).addToCartButtonsFound) || 0);
-      if (productFormsFound === 0) {
-        addDiagnostic(findings, 'product-form-missing', [
-          'page.likelyPageType: ' + ((((report || {}).page || {}).likelyPageType) || 'unknown'),
-          'page.productFormsFound: 0'
-        ]);
-      }
-      if (addToCartButtonsFound === 0) {
-        addDiagnostic(findings, 'atc-button-missing', [
-          'page.likelyPageType: ' + ((((report || {}).page || {}).likelyPageType) || 'unknown'),
-          'page.addToCartButtonsFound: 0'
-        ]);
-      }
-    }
-
-    if (issueLooksGreyScreen(issue)) {
-      addDiagnostic(findings, 'grey-screen-needs-screenshots', ['Scanner warning: old Console/Network errors require screenshots.']);
-    }
-
-    if (issue && issue.id === 'feature-request') {
-      addDiagnostic(findings, 'feature-request-savio', ['Selected issue is Feature Request.']);
-    }
-
-    if (issue && issue.status === 'shopify-limit') {
-      addDiagnostic(findings, 'shopify-limitation', ['Selected issue status: shopify-limit.']);
-    }
-
-    if (issue && issue.status === 'conflict') {
-      addDiagnostic(findings, 'third-party-conflict', ['Selected issue status: conflict.']);
-    }
-
-    if (issueLooksGeolocation(issue)) {
-      addDiagnostic(findings, 'geolocation-verification', ['Selected issue wording suggests country, market, currency, or geolocation targeting.']);
-    }
-
-    if (!findings.length) {
-      findings.push({
-        id: 'no-strong-match',
-        label: 'No strong scanner match',
-        confidence: 'Low',
-        summary: 'The scanner did not find a strong direct match. The issue is possible, but needs confirmation with the normal checklist and screenshots.',
-        rootCauseCategory: 'Needs access',
-        cause: 'The scanner did not find a direct match for the selected app and issue.',
-        evidence: [
-          'Page type: ' + ((((report || {}).page || {}).likelyPageType) || 'unknown'),
-          'Expected placement count: ' + placementTotal,
-          'Runtime errors during scan: ' + (((report || {}).runtimeErrors || []).length)
-        ],
-        nextSteps: [
-          'Use the existing investigation checklist for the selected issue.',
-          'Compare the active theme against Dawn or a clean theme preview.',
-          'Collect Console and Network screenshots if the issue is visual or loading-related.'
-        ],
-        merchantAngle: 'The scanner did not find a clear storefront signal yet, so we need to continue with the normal checklist.',
-        internalNote: 'No diagnostic rule matched strongly.',
-        escalation: 'Escalate only after checklist evidence is collected.',
-        devEscalationNeeded: false,
-        accessNeeded: !!(app && app.access && app.access.length)
-      });
-    }
-
-    sortDiagnostics(findings);
-
-    var top = findings[0];
-    return {
-      appName: app ? app.name : 'No app selected',
-      issueLabel: issue ? issue.label : 'No issue selected',
-      scannedUrl: (((report || {}).meta || {}).url) || '',
-      scannedAt: (((report || {}).meta || {}).scannedAt) || '',
-      summary: top.summary,
-      likelyCause: top.cause,
-      confidence: top.confidence,
-      rootCauseCategory: top.rootCauseCategory,
-      evidence: top.evidence || [],
-      nextSteps: top.nextSteps || [],
-      snippets: getSuggestedSnippets(appId, issue, top),
-      merchantAngle: top.merchantAngle,
-      internalNote: top.internalNote,
-      escalation: top.escalation,
-      devEscalationNeeded: top.devEscalationNeeded,
-      accessNeeded: top.accessNeeded,
-      findings: findings
-    };
-  }
-
-  function formatScannerAnalysis(analysis) {
-    if (!analysis) return '';
-    var parts = [];
-    parts.push('=== STOREFRONT SCANNER DIAGNOSTIC SUMMARY ===');
-    parts.push('APP: ' + analysis.appName);
-    parts.push('ISSUE: ' + analysis.issueLabel);
-    if (analysis.scannedUrl) parts.push('SCANNED URL: ' + analysis.scannedUrl);
-    if (analysis.scannedAt) parts.push('SCANNED AT: ' + analysis.scannedAt);
-    parts.push('\nSUMMARY: ' + analysis.summary);
-    parts.push('CONFIDENCE: ' + analysis.confidence);
-    parts.push('LIKELY ROOT CAUSE CATEGORY: ' + analysis.rootCauseCategory);
-    parts.push('ACCESS NEEDED: ' + (analysis.accessNeeded ? 'Yes' : 'No'));
-
-    if (analysis.evidence.length) {
-      parts.push('\n--- EVIDENCE ---');
-      analysis.evidence.forEach(function (item) { parts.push('  - ' + item); });
-    }
-
-    if (analysis.nextSteps.length) {
-      parts.push('\n--- NEXT STEPS ---');
-      analysis.nextSteps.forEach(function (item) { parts.push('  - ' + item); });
-    }
-
-    if (analysis.snippets.length) {
-      parts.push('\n--- SUGGESTED SNIPPET / FIX ---');
-      analysis.snippets.forEach(function (item) {
-        parts.push('  - ' + item.id + ': ' + item.label + ' (' + item.type + ')');
-      });
-    }
-
-    parts.push('\nMERCHANT REPLY ANGLE: ' + analysis.merchantAngle);
-    parts.push('INTERNAL NOTE: ' + analysis.internalNote);
-    if (analysis.devEscalationNeeded) {
-      parts.push('DEV ESCALATION SUMMARY: ' + analysis.escalation);
-    }
-
-    if (analysis.findings.length > 1) {
-      parts.push('\n--- OTHER SIGNALS ---');
-      analysis.findings.slice(1).forEach(function (finding) {
-        parts.push('  - ' + finding.label + ' (' + finding.confidence + ', ' + finding.rootCauseCategory + ')');
-      });
-    }
-
-    return parts.join('\n');
-  }
-
-  function renderScannerResults() {
-    var container = el('scanner-results');
-    if (!container) return;
-
-    var analysis = state.scannerAnalysis;
-    if (!analysis) {
-      container.innerHTML = '<p class="placeholder-msg">Paste a scanner report and analyze it to see likely cause, evidence, next steps, snippets, reply angle, internal note, and escalation guidance.</p>';
-      return;
-    }
-
-    var evidenceHtml = (analysis.evidence || []).map(function (item) {
-      return '<li>' + escapeHtml(item) + '</li>';
-    }).join('');
-    var stepsHtml = (analysis.nextSteps || []).map(function (item) {
-      return '<li>' + escapeHtml(item) + '</li>';
-    }).join('');
-    var snippetsHtml = (analysis.snippets || []).length
-      ? analysis.snippets.map(function (item) {
-        return '<li><code>' + escapeHtml(item.id) + '</code> - ' + escapeHtml(item.label) + ' <span class="scanner-confidence">' + escapeHtml(item.type) + '</span></li>';
-      }).join('')
-      : '<li>No direct snippet match. Use the selected issue checklist.</li>';
-    var otherFindingsHtml = (analysis.findings || []).slice(1).map(function (finding) {
-      return '<li>' + escapeHtml(finding.label) + ' <span class="scanner-confidence">' + escapeHtml(finding.confidence) + ' / ' + escapeHtml(finding.rootCauseCategory) + '</span></li>';
-    }).join('');
-    var escalationHtml = analysis.devEscalationNeeded
-      ? '<h4>Dev escalation summary</h4><p>' + escapeHtml(analysis.escalation) + '</p>'
-      : '';
-
-    container.innerHTML =
-      '<div class="scanner-result-top">' +
-      '<span class="chip chip-theme">' + escapeHtml(analysis.confidence) + ' confidence</span>' +
-      '<span class="scanner-access">Category: ' + escapeHtml(analysis.rootCauseCategory) + '</span>' +
-      '<span class="scanner-access">Access needed: ' + (analysis.accessNeeded ? 'Yes' : 'No') + '</span>' +
-      '</div>' +
-      '<h4>Summary</h4>' +
-      '<p>' + escapeHtml(analysis.summary) + '</p>' +
-      '<h4>Evidence</h4>' +
-      '<ul>' + evidenceHtml + '</ul>' +
-      '<h4>Likely root cause category</h4>' +
-      '<p>' + escapeHtml(analysis.rootCauseCategory) + '</p>' +
-      '<h4>Recommended next steps</h4>' +
-      '<ul>' + stepsHtml + '</ul>' +
-      '<h4>Suggested snippet / fix</h4>' +
-      '<ul>' + snippetsHtml + '</ul>' +
-      '<h4>Suggested merchant reply angle</h4>' +
-      '<p>' + escapeHtml(analysis.merchantAngle) + '</p>' +
-      '<h4>Internal note</h4>' +
-      '<p>' + escapeHtml(analysis.internalNote) + '</p>' +
-      escalationHtml +
-      (otherFindingsHtml ? '<h4>Other signals</h4><ul>' + otherFindingsHtml + '</ul>' : '');
-  }
-
-  function renderScannerError(message) {
-    var container = el('scanner-results');
-    if (!container) return;
-    container.innerHTML =
-      '<div class="scanner-error">' +
-      '<strong>Scanner report could not be analyzed.</strong>' +
-      '<p>' + escapeHtml(message) + '</p>' +
-      '</div>';
-  }
-
-  function analyzeScannerInput() {
-    var input = el('scanner-json-input');
-    var raw = input ? input.value.trim() : '';
-    if (!raw) {
-      renderScannerError('Paste the scanner JSON report first.');
-      return false;
-    }
-    try {
-      state.scannerReport = JSON.parse(raw);
-      state.scannerAnalysis = analyzeScannerReport(state.scannerReport);
-      renderScannerResults();
-      return true;
-    } catch (err) {
-      state.scannerReport = null;
-      state.scannerAnalysis = null;
-      renderScannerError('Invalid JSON: ' + err.message);
-      return false;
-    }
-  }
-
-  function initScannerPanel() {
-    var script = getScannerScript();
-    var preview = el('scanner-script-preview');
-    var copyBtn = el('copy-scanner-script');
-    var refreshBtn = el('refresh-scanner-panel');
-    var analyzeBtn = el('analyze-scanner-report');
-    var copySummaryBtn = el('copy-diagnostic-summary');
-    var copyPackageBtn = el('copy-troubleshooting-package');
-
-    if (preview) preview.textContent = script;
-
-    if (copyBtn) {
-      copyBtn.addEventListener('click', function () {
-        copyText(script, copyBtn);
-      });
-    }
-
-    if (refreshBtn) {
-      refreshBtn.addEventListener('click', function () {
-        var latestScript = getScannerScript();
-        var input = el('scanner-json-input');
-        if (preview) preview.textContent = latestScript;
-        if (!input || !input.value.trim()) {
-          state.scannerReport = null;
-          state.scannerAnalysis = null;
-          renderScannerResults();
-          return;
-        }
-        analyzeScannerInput();
-      });
-    }
-
-    if (analyzeBtn) {
-      analyzeBtn.addEventListener('click', function () {
-        analyzeScannerInput();
-      });
-    }
-
-    if (copySummaryBtn) {
-      copySummaryBtn.addEventListener('click', function () {
-        copyText(formatScannerAnalysis(state.scannerAnalysis), copySummaryBtn);
-      });
-    }
-
-    if (copyPackageBtn) {
-      copyPackageBtn.addEventListener('click', function () {
-        copyText(buildFullPackage(), copyPackageBtn);
-      });
-    }
   }
 
   // ---- Wire up copy buttons ---------------------------------
@@ -1597,8 +1162,8 @@
       parts.push(notes.trim());
     }
 
-    if (state.scannerAnalysis) {
-      parts.push('\n' + formatScannerAnalysis(state.scannerAnalysis));
+    if (window.ESSENTIAL_CASE_TRIAGE && window.ESSENTIAL_CASE_TRIAGE.getPackageText) {
+      parts.push('\n' + window.ESSENTIAL_CASE_TRIAGE.getPackageText());
     }
 
     return parts.join('\n');
@@ -1613,16 +1178,13 @@
     state.ticketFilterApp = appId;
     state.ticketFilterIssue = 'all';
     state.updateFilterApp = appId;
-    if (state.scannerReport) {
-      state.scannerAnalysis = analyzeScannerReport(state.scannerReport);
-    }
     renderAll();
-    renderScannerResults();
     renderSnippetFilters();
     renderTicketFilters();
     renderSnippetsPanel();
     renderTicketsPanel();
     renderUpdatesPanel();
+    announceSelection();
     activateTab('workflow');
     // Scroll main panel to top
     var main = el('main-panel');
@@ -1631,13 +1193,20 @@
 
   function selectIssue(issueId) {
     state.selectedIssueId = issueId;
-    if (state.scannerReport) {
-      state.scannerAnalysis = analyzeScannerReport(state.scannerReport);
-      renderScannerResults();
-    }
     renderFeatureRequestPanel();
     renderIssueDetail();
     renderMacroList();
+    announceSelection();
+  }
+
+  function announceSelection() {
+    window.ESSENTIAL_DASHBOARD_SELECTION = {
+      appId: state.selectedAppId,
+      issueId: state.selectedIssueId
+    };
+    document.dispatchEvent(new CustomEvent('essential:selection-changed', {
+      detail: window.ESSENTIAL_DASHBOARD_SELECTION
+    }));
   }
 
   function renderAll() {
@@ -1648,6 +1217,7 @@
     renderFeatureRequestPanel();
     renderIssueDetail();
     renderWorkflowSnippets();
+    renderWorkflowResources();
     renderMacroList();
     renderEntryFormOptions();
     renderUpdatesPanel();
@@ -1796,6 +1366,14 @@
   }
 
   function initSearchAndFilters() {
+    var appSearch = el('app-search');
+    if (appSearch) {
+      appSearch.addEventListener('input', function () {
+        state.appSearch = this.value;
+        renderAppList();
+      });
+    }
+
     var searchBox = el('snippet-search');
     if (searchBox) {
       searchBox.addEventListener('input', function () {
@@ -1970,14 +1548,16 @@
         return;
       }
 
-      var matchedIssues = [], matchedSnippets = [], matchedMacros = [], matchedTickets = [];
+      var matchedIssues = [], matchedSnippets = [], matchedMacros = [], matchedTickets = [], matchedResources = [];
 
       // Issues: match label, causes, or fixes
       (window.ESSENTIAL_ISSUES || []).forEach(function (i) {
         var inLabel  = i.label.toLowerCase().includes(q);
         var inCauses = (i.causes || []).some(function (c) { return c.toLowerCase().includes(q); });
         var inFixes  = (i.fixes || []).some(function (f) { return f.toLowerCase().includes(q); });
-        if (inLabel || inCauses || inFixes) matchedIssues.push(i);
+        var inEvidence = (i.evidenceNeeded || []).some(function (item) { return item.toLowerCase().includes(q); });
+        var inSource = (i.sourceTitle || '').toLowerCase().includes(q);
+        if (inLabel || inCauses || inFixes || inEvidence || inSource) matchedIssues.push(i);
       });
 
       // Snippets: match label, code, description, or tags
@@ -2004,15 +1584,42 @@
         if (getTicketSearchText(ticket).includes(q)) matchedTickets.push(ticket);
       });
 
-      renderGlobalSearchResults(matchedIssues, matchedSnippets, matchedMacros, matchedTickets, q);
+      getApps().forEach(function (app) {
+        var resource = getAppResource(app.id);
+        var appText = [app.name, app.id].concat(resource.aliases || []).join(' ').toLowerCase();
+        if (appText.includes(q)) {
+          matchedResources.push({ type: 'app', label: app.name, appId: app.id, url: resource.helpCenterUrl || '' });
+        }
+        (resource.articles || []).forEach(function (article) {
+          if (article[0].toLowerCase().includes(q)) {
+            matchedResources.push({ type: 'article', label: article[0], appId: app.id, appName: app.name, url: article[1] });
+          }
+        });
+      });
+
+      (window.ESSENTIAL_INTERNAL_PROCEDURES || []).forEach(function (procedure) {
+        var procedureText = [procedure.title, procedure.summary].concat(procedure.steps || []).join(' ').toLowerCase();
+        if (procedureText.includes(q)) {
+          var procedureAppId = (procedure.appIds || []).find(function (id) { return id !== 'all'; }) || '';
+          matchedResources.push({
+            type: 'procedure',
+            label: procedure.title,
+            appId: procedureAppId,
+            appName: 'Internal procedure',
+            url: ''
+          });
+        }
+      });
+
+      renderGlobalSearchResults(matchedIssues, matchedSnippets, matchedMacros, matchedTickets, matchedResources, q);
     });
   }
 
-  function renderGlobalSearchResults(issues, snippets, macros, tickets, q) {
+  function renderGlobalSearchResults(issues, snippets, macros, tickets, resources, q) {
     var container = el('global-search-results');
     if (!container) return;
 
-    if (!issues.length && !snippets.length && !macros.length && !tickets.length) {
+    if (!issues.length && !snippets.length && !macros.length && !tickets.length && !resources.length) {
       container.innerHTML = '<div class="search-result-empty">No results for "' + escapeHtml(q) + '"</div>';
       return;
     }
@@ -2022,9 +1629,32 @@
     if (issues.length) {
       html += '<div class="search-result-group-label">Issues</div>';
       html += issues.slice(0, 5).map(function (i) {
-        return '<div class="search-result-item search-result-issue" data-issue-id="' + escapeHtml(i.id) + '">' +
+        var targetApp = (i.appIds || []).find(function (id) { return id !== 'all'; }) || state.selectedAppId || '';
+        return '<div class="search-result-item search-result-issue" data-app-id="' + escapeHtml(targetApp) + '" data-issue-id="' + escapeHtml(i.id) + '">' +
           statusChip(i.status) +
           '<span class="search-result-label">' + escapeHtml(i.label) + '</span>' +
+          '</div>';
+      }).join('');
+    }
+
+    if (resources.length) {
+      html += '<div class="search-result-group-label">Apps & Help Center</div>';
+      html += resources.slice(0, 6).map(function (resource) {
+        if (resource.type === 'procedure') {
+          return '<div class="search-result-item search-result-procedure" data-app-id="' + escapeHtml(resource.appId) + '">' +
+            '<span class="snippet-type-badge type-macro">Procedure</span>' +
+            '<span class="search-result-label">' + escapeHtml(resource.label) + '</span>' +
+            '</div>';
+        }
+        if (resource.type === 'article') {
+          return '<a class="search-result-item search-result-resource" href="' + escapeHtml(resource.url) + '" target="_blank" rel="noopener noreferrer">' +
+            '<span class="snippet-type-badge type-macro">Article</span>' +
+            '<span class="search-result-label">' + escapeHtml(resource.appName + ': ' + resource.label) + '</span>' +
+            '</a>';
+        }
+        return '<div class="search-result-item search-result-app" data-app-id="' + escapeHtml(resource.appId) + '">' +
+          '<span class="snippet-type-badge type-macro">App</span>' +
+          '<span class="search-result-label">' + escapeHtml(resource.label) + '</span>' +
           '</div>';
       }).join('');
     }
@@ -2067,10 +1697,30 @@
     qsa('.search-result-issue', container).forEach(function (item) {
       item.addEventListener('click', function () {
         var issueId = this.getAttribute('data-issue-id');
+        var appId = this.getAttribute('data-app-id');
+        if (appId) selectApp(appId);
         selectIssue(issueId);
         // Switch to workflow tab
         var workflowTab = qs('[data-tab="workflow"]');
         if (workflowTab) workflowTab.click();
+        container.innerHTML = '';
+        document.getElementById('global-search').value = '';
+      });
+    });
+
+    qsa('.search-result-app', container).forEach(function (item) {
+      item.addEventListener('click', function () {
+        selectApp(this.getAttribute('data-app-id'));
+        container.innerHTML = '';
+        document.getElementById('global-search').value = '';
+      });
+    });
+
+    qsa('.search-result-procedure', container).forEach(function (item) {
+      item.addEventListener('click', function () {
+        var appId = this.getAttribute('data-app-id');
+        if (appId) selectApp(appId);
+        else activateTab('workflow');
         container.innerHTML = '';
         document.getElementById('global-search').value = '';
       });
@@ -2110,7 +1760,7 @@
     initInternalNotes();
     initCopyPackage();
     initGlobalSearch();
-    initScannerPanel();
+    announceSelection();
 
     // Close global search results on outside click
     document.addEventListener('click', function (e) {

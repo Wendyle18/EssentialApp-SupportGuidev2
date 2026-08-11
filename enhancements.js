@@ -62,7 +62,7 @@
   }
 
   function getAppLabel(item) {
-    var label = item.querySelector('.app-item-label');
+    var label = item.querySelector('.app-item-label, .app-item-name');
     return (label ? label.textContent : item.textContent).trim();
   }
 
@@ -343,9 +343,7 @@
     injectStyles();
     ensureUpdateDetailModal();
     enhanceRenderedUi();
-
-    var observer = new MutationObserver(enhanceRenderedUi);
-    observer.observe(document.body, { childList: true, subtree: true });
+    document.addEventListener('essential:ui-rendered', enhanceRenderedUi);
 
     document.addEventListener('keydown', function (event) {
       var modal = el('update-detail-modal');

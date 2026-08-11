@@ -515,6 +515,170 @@ window.ESSENTIAL_SNIPPETS = [
     tags: ['preorder', 'class', 'price'],
     description: 'Add to the price container element for preorder to update displayed price correctly.',
     code: 'class="essential-preorder-initial-prices-container"'
+  },
+
+  // --- Additional updated support-guide snippets ------------
+  {
+    id: 'console-free-gifts',
+    label: 'Free Gifts & BOGO: Check Config',
+    type: 'console',
+    appId: 'essential-free-gifts-bogo',
+    tags: ['free-gifts', 'bogo', 'debug', 'console'],
+    code: 'window.essentialFreeGiftsConfig'
+  },
+  {
+    id: 'placement-free-shipping-by-id',
+    label: 'Free Shipping: Booster Placement by ID',
+    type: 'liquid',
+    appId: 'essential-free-shipping',
+    tags: ['free-shipping', 'placement', 'booster', 'id'],
+    description: 'Show one booster by ID. Replace BOOSTER_ID_HERE. Do not use this placement in a side cart.',
+    code: '<div class="order-value-booster-block" id="BOOSTER_ID_HERE"></div>'
+  },
+  {
+    id: 'placement-free-shipping-top-bar',
+    label: 'Free Shipping: Default Top Bar Placement',
+    type: 'liquid',
+    appId: 'essential-free-shipping',
+    tags: ['free-shipping', 'placement', 'top-bar'],
+    code: '<div class="essential-free-shipping-bar"></div>'
+  },
+  {
+    id: 'placement-free-shipping-product',
+    label: 'Free Shipping: Product Page Placement',
+    type: 'liquid',
+    appId: 'essential-free-shipping',
+    tags: ['free-shipping', 'placement', 'product'],
+    description: 'Default product-page booster placement. Published product-page boosters render here.',
+    code: '<div class="essential-order-value-booster-placement"></div>'
+  },
+  {
+    id: 'placement-countdown-top-bar',
+    label: 'Countdown Timer: Default Top Bar Placement',
+    type: 'liquid',
+    appId: 'essential-countdown-timer',
+    tags: ['countdown', 'placement', 'top-bar'],
+    code: '<div class="essential-countdown-top-bar"></div>'
+  },
+  {
+    id: 'placement-countdown-side-cart',
+    label: 'Countdown Timer: Side Cart Placement',
+    type: 'liquid',
+    appId: 'essential-countdown-timer',
+    tags: ['countdown', 'placement', 'cart'],
+    description: 'Use only in a side/drawer cart with Cart Page placement selected.',
+    code: '<div class="countdown-timer-side-cart"></div>'
+  },
+  {
+    id: 'placement-trust-badges-side-cart-top',
+    label: 'Trust Badges: Side Cart Top Placement',
+    type: 'liquid',
+    appId: 'essential-trust-badges-icons',
+    tags: ['trust-badges', 'placement', 'cart', 'top'],
+    code: '<div class="essential-banners-block-side-cart-top"></div>'
+  },
+  {
+    id: 'placement-trust-badges-side-cart-bottom',
+    label: 'Trust Badges: Side Cart Bottom Placement',
+    type: 'liquid',
+    appId: 'essential-trust-badges-icons',
+    tags: ['trust-badges', 'placement', 'cart', 'bottom'],
+    code: '<div class="essential-banners-block-side-cart-bottom"></div>'
+  },
+  {
+    id: 'placement-upsell-fbt',
+    label: 'Upsell: Frequently Bought Together Placement',
+    type: 'liquid',
+    appId: 'essential-upsell-cross-sell',
+    tags: ['upsell', 'fbt', 'placement'],
+    code: '<div class="essential-upsell-frequently-bought-together-default-placement"></div>'
+  },
+  {
+    id: 'placement-upsell-cross-sell',
+    label: 'Upsell: Cross-Sell Placement',
+    type: 'liquid',
+    appId: 'essential-upsell-cross-sell',
+    tags: ['upsell', 'cross-sell', 'placement'],
+    code: '<div class="essential-upsell-cross-sell-default-placement"></div>'
+  },
+  {
+    id: 'placement-upsell-addon-default',
+    label: 'Upsell: Alternate Product Add-On Placement',
+    type: 'liquid',
+    appId: 'essential-upsell-cross-sell',
+    tags: ['upsell', 'addon', 'placement', 'fallback'],
+    description: 'Fallback product add-on placement when the standard block placement does not work.',
+    code: '<div class="essential-upsell-product-addon-default-placement"></div>'
+  },
+  {
+    id: 'class-upsell-addon-atc',
+    label: 'Upsell: Product Add-On Add to Cart Class',
+    type: 'class',
+    appId: 'essential-upsell-cross-sell',
+    tags: ['upsell', 'addon', 'class', 'atc'],
+    description: 'Add to the original theme Add to Cart button when the Add-On item is not added.',
+    code: 'class="essential-upsell-product-addon-add-to-cart-button"'
+  },
+  {
+    id: 'placement-preorder-notify-me',
+    label: 'Preorder: Notify Me Button Placement',
+    type: 'liquid',
+    appId: 'essential-preorder-presale',
+    tags: ['preorder', 'notify-me', 'placement'],
+    code: '<div class="essential-preorder-bis-button-placement"></div>'
+  },
+  {
+    id: 'class-preorder-atc-text',
+    label: 'Preorder: Add to Cart Button Text Class',
+    type: 'class',
+    appId: 'essential-preorder-presale',
+    tags: ['preorder', 'class', 'button', 'text'],
+    description: 'Add to the text element inside the theme Add to Cart button.',
+    code: 'class="essential-preorder-initial-add-to-cart-text"'
+  },
+  {
+    id: 'class-preorder-product-badge',
+    label: 'Preorder: Product Page Badge Container Class',
+    type: 'class',
+    appId: 'essential-preorder-presale',
+    tags: ['preorder', 'class', 'badge', 'product-image'],
+    description: 'Add to a product image container. Currently intended for product-page badge placement.',
+    code: 'class="essential-preorder-product-page-badge-container"'
+  },
+  {
+    id: 'class-cart-custom-atc',
+    label: 'Cart Drawer: Custom Add to Cart Element Class',
+    type: 'class',
+    appId: 'essential-cart-drawer',
+    tags: ['cart-drawer', 'sticky-cart', 'class', 'atc'],
+    description: 'Add to the original Add to Cart element when sticky-bar visibility detection needs a custom target.',
+    code: 'class="essential-cart-custom-add-to-cart-element"'
+  },
+  {
+    id: 'placement-cart-spend-tier',
+    label: 'Cart Drawer: Spend Tiers Placement',
+    type: 'liquid',
+    appId: 'essential-cart-drawer',
+    tags: ['cart-drawer', 'spend-tier', 'placement'],
+    description: 'Shows the Spend Tiers widget anywhere on the storefront except checkout.',
+    code: '<div class="essential-spend-tier-bar"></div>'
+  },
+  {
+    id: 'placement-rockit-cart-savings',
+    label: 'Rockit Sales: Cart Savings Placement',
+    type: 'liquid',
+    appId: 'rockit-discounts-sales',
+    tags: ['rockit', 'cart-savings', 'placement'],
+    description: 'Use on the cart page or cart drawer after removing the existing Cart Savings app block.',
+    code: '<div class="rockit-sales-manager-savings-widget-container"></div>'
+  },
+  {
+    id: 'placement-loyalty-cart',
+    label: 'Loyalty: Cart Points Placement',
+    type: 'liquid',
+    appId: 'essential-loyalty',
+    tags: ['loyalty', 'cart', 'placement'],
+    code: '<div data-cp-anchor></div>'
   }
 
   // TODO: Add more snippets for new fixes, CSS overrides, or liquid placements

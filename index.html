@@ -36,6 +36,10 @@
     <!-- ===== SIDEBAR: App List ===== -->
     <nav class="sidebar">
       <div class="sidebar-header">Apps</div>
+      <div class="sidebar-search-wrap">
+        <label class="sr-only" for="app-search">Search apps</label>
+        <input id="app-search" type="search" placeholder="Find an app…" autocomplete="off">
+      </div>
       <ul id="app-list">
         <!-- Rendered by app.js -->
       </ul>
@@ -51,15 +55,15 @@
 
       <!-- Tab Bar -->
       <div class="tab-bar">
-        <button class="tab-btn" data-tab="workflow" type="button">Workflow</button>
+        <button class="tab-btn active" data-tab="workflow" type="button">Workflow</button>
         <button class="tab-btn" data-tab="tickets" type="button">Ticket references</button>
-        <button class="tab-btn active" data-tab="snippets" type="button">Snippets</button>
+        <button class="tab-btn" data-tab="snippets" type="button">Snippets</button>
         <button class="tab-btn" data-tab="macros" type="button">Reply templates</button>
         <button class="tab-btn" data-tab="notes" type="button">Updates</button>
       </div>
 
       <!-- ===== TAB: Workflow ===== -->
-      <div class="tab-panel" id="tab-workflow">
+      <div class="tab-panel active" id="tab-workflow">
 
         <!-- App Header + Issue Selector -->
         <div class="card full-width workflow-intro">
@@ -73,6 +77,95 @@
             <!-- Rendered by app.js when Feature Request is selected -->
           </div>
         </div>
+
+        <!-- App-specific snippets kept near the top for fast access -->
+        <section class="card full-width workflow-priority-snippets">
+          <div class="section-header">
+            <div>
+              <h3>Related Snippets</h3>
+              <p>Quick commands and customizations for the selected app.</p>
+            </div>
+          </div>
+          <div id="workflow-snippets">
+            <p class="placeholder-msg">Select an app to see related snippets.</p>
+          </div>
+        </section>
+
+        <!-- Guided case intake and copy-ready outputs -->
+        <section class="card full-width case-triage-card" id="case-triage">
+          <div class="section-header case-triage-header">
+            <div>
+              <h3>Guided Case Triage</h3>
+              <p>Capture the case once, then generate a summary, investigation plan, merchant response, and engineering escalation.</p>
+            </div>
+            <div class="case-actions">
+              <button class="btn-secondary" id="generate-case-package" type="button">Generate Case Package</button>
+              <button class="btn-copy" id="copy-case-package" type="button">Copy Case Package</button>
+              <button class="btn-secondary" id="reset-case-triage" type="button">Reset</button>
+            </div>
+          </div>
+
+          <div class="case-form-grid">
+            <label>Agent name<input class="case-field" id="case-agent-name" type="text" value="Wendyle" autocomplete="name"></label>
+            <label>Store domain<input class="case-field" id="case-store" type="text" placeholder="store.myshopify.com" autocomplete="off"></label>
+            <label>Merchant name<input class="case-field" id="case-merchant-name" type="text" placeholder="Merchant name" autocomplete="off"></label>
+            <label>Merchant email<input class="case-field" id="case-merchant-email" type="email" placeholder="merchant@example.com" autocomplete="off"></label>
+            <label class="case-field-wide">Expected behavior<textarea class="case-field" id="case-expected" placeholder="What should happen?"></textarea></label>
+            <label class="case-field-wide">Actual behavior<textarea class="case-field" id="case-actual" placeholder="What is happening instead?"></textarea></label>
+            <label class="case-field-wide">Affected URL / product / order / campaign<input class="case-field" id="case-affected" type="text" placeholder="Paste the relevant identifier or URL" autocomplete="off"></label>
+            <label>Browser and device<input class="case-field" id="case-browser-device" type="text" placeholder="Chrome, Safari, mobile…" autocomplete="off"></label>
+            <label>Theme and related apps<input class="case-field" id="case-theme-apps" type="text" placeholder="Theme name and integrations" autocomplete="off"></label>
+            <label>Collaborator access
+              <select class="case-field" id="case-access-status">
+                <option value="Unknown">Unknown</option>
+                <option value="Not needed">Not needed</option>
+                <option value="Requested">Requested</option>
+                <option value="Granted">Granted</option>
+                <option value="Unavailable">Unavailable</option>
+              </select>
+            </label>
+            <label>Root-cause category<select class="case-field" id="case-root-cause"></select></label>
+            <label>Severity
+              <select class="case-field" id="case-severity">
+                <option value="Low">Low</option>
+                <option value="Medium" selected>Medium</option>
+                <option value="High">High</option>
+                <option value="Critical">Critical</option>
+              </select>
+            </label>
+            <label>Confidence
+              <select class="case-field" id="case-confidence">
+                <option value="Low">Low</option>
+                <option value="Medium" selected>Medium</option>
+                <option value="High">High</option>
+              </select>
+            </label>
+            <label>Case status<select class="case-field" id="case-status"></select></label>
+            <label class="case-field-wide">Troubleshooting completed<textarea class="case-field" id="case-troubleshooting" placeholder="One completed check per line"></textarea></label>
+            <label class="case-field-wide">Screenshots / recordings / evidence<textarea class="case-field" id="case-evidence" placeholder="Paste links or describe the evidence received"></textarea></label>
+          </div>
+
+          <div class="case-context-strip" id="case-selected-context">Select an app and issue to activate guided recommendations.</div>
+
+          <div class="case-output-grid">
+            <section class="case-output-card">
+              <div class="section-header"><h4>Ticket Summary</h4><button class="btn-copy btn-sm" type="button" data-copy-case-target="case-summary-output">Copy</button></div>
+              <pre id="case-summary-output" class="case-output">Select an app and issue, then add the available ticket context.</pre>
+            </section>
+            <section class="case-output-card">
+              <div class="section-header"><h4>Diagnosis & Next Checks</h4><button class="btn-copy btn-sm" type="button" data-copy-case-target="case-diagnosis-output">Copy</button></div>
+              <pre id="case-diagnosis-output" class="case-output">The suggested category, checks, missing evidence, and escalation threshold will appear here.</pre>
+            </section>
+            <section class="case-output-card">
+              <div class="section-header"><h4>Merchant Response</h4><button class="btn-copy btn-sm" type="button" data-copy-case-target="case-merchant-output">Copy</button></div>
+              <pre id="case-merchant-output" class="case-output">A copy-ready response will appear here.</pre>
+            </section>
+            <section class="case-output-card">
+              <div class="section-header"><h4>Engineering Escalation</h4><button class="btn-copy btn-sm" type="button" data-copy-case-target="case-escalation-output">Copy</button></div>
+              <pre id="case-escalation-output" class="case-output">A complete Slack escalation will appear here.</pre>
+            </section>
+          </div>
+        </section>
 
         <!-- Two-column grid for the rest of workflow -->
         <div class="workflow-grid">
@@ -90,51 +183,16 @@
               <p class="placeholder-msg">Select an issue to see the investigation guide.</p>
             </div>
 
-            <div class="card storefront-scanner-card" id="storefront-scanner">
-              <div class="section-header">
-                <div>
-                  <h3>Storefront Scanner</h3>
-                  <p class="scanner-intro">Copy the read-only scanner, run it in the merchant storefront Console, then paste the JSON report here.</p>
-                </div>
-                <div class="scanner-header-actions">
-                  <button class="btn-icon scanner-refresh-btn" id="refresh-scanner-panel" type="button" title="Refresh scanner analysis" aria-label="Refresh scanner analysis">&#8635;</button>
-                  <button class="btn-copy btn-sm" id="copy-scanner-script" type="button">Copy Storefront Scanner</button>
-                </div>
-              </div>
-
-              <details class="scanner-preview">
-                <summary>Scanner script preview</summary>
-                <pre class="code-block" id="scanner-script-preview"></pre>
-              </details>
-
-              <label class="scanner-label" for="scanner-json-input">Paste scanner JSON report here</label>
-              <textarea
-                class="scanner-json-area"
-                id="scanner-json-input"
-                placeholder='Paste the scanner JSON report here...'
-              ></textarea>
-
-              <div class="scanner-actions">
-                <button class="btn-secondary" id="analyze-scanner-report" type="button">Analyze Scanner Report</button>
-                <button class="btn-secondary" id="copy-diagnostic-summary" type="button">Copy Diagnostic Summary</button>
-                <button class="btn-secondary" id="copy-troubleshooting-package" type="button">Copy Full Troubleshooting Package</button>
-              </div>
-
-              <div class="scanner-results" id="scanner-results">
-                <p class="placeholder-msg">Paste a scanner report and analyze it to see likely cause, evidence, next steps, snippets, reply angle, internal note, and escalation guidance.</p>
-              </div>
-            </div>
-
           </div>
 
-          <!-- RIGHT: Snippets relevant to selected app -->
+          <!-- RIGHT: App knowledge and limitations -->
           <div class="workflow-col">
             <div class="card">
               <div class="section-header">
-                <h3>Related Snippets</h3>
+                <h3>Knowledge & Limitations</h3>
               </div>
-              <div id="workflow-snippets">
-                <p class="placeholder-msg">Select an app to see related snippets.</p>
+              <div id="workflow-resources">
+                <p class="placeholder-msg">Select an app to open its Help Center resources and known limitations.</p>
               </div>
             </div>
           </div>
@@ -175,7 +233,7 @@
       <!-- /tab-tickets -->
 
       <!-- ===== TAB: Snippet Library ===== -->
-      <div class="tab-panel active" id="tab-snippets">
+      <div class="tab-panel" id="tab-snippets">
         <div class="snippets-controls">
           <input
             type="text"
@@ -193,6 +251,7 @@
             <option value="css">CSS</option>
             <option value="js">JS</option>
             <option value="liquid">Liquid</option>
+            <option value="html">HTML</option>
             <option value="class">Class</option>
           </select>
         </div>
@@ -319,11 +378,12 @@
   <script src="data/snippets.js"></script>
   <script src="data/macros.js"></script>
   <script src="data/tickets.js"></script>
-  <script src="data/scannerScripts.js"></script>
-  <script src="data/diagnosticRules.js"></script>
+  <script src="data/playbooks.js"></script>
 
   <!-- ===== MAIN APP ===== -->
   <script src="app.js"></script>
+  <script src="triage.js"></script>
+  <script src="enhancements.js"></script>
 
 </body>
 </html>

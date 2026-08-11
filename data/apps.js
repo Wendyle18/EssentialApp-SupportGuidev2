@@ -169,6 +169,51 @@ window.ESSENTIAL_APPS = [
       'Products',
       'Discounts'
     ]
+  },
+  {
+    id: 'essential-subscriptions',
+    name: 'Essential Subscriptions',
+    slug: 'essential-subscriptions',
+    consoleKey: null,
+    reviewLink: 'https://apps.shopify.com/essential-subscriptions#modal-show=ReviewListingModal',
+    accessConfirmed: false,
+    accessNote: 'Confirm the final collaborator permission list internally before sending the request.',
+    access: [
+      'Themes',
+      'Edit theme code',
+      'Manage and install apps and channels',
+      'Products',
+      'Customers',
+      'Orders'
+    ]
+  },
+  {
+    id: 'essential-free-gifts-bogo',
+    name: 'Essential Free Gifts & BOGO',
+    slug: 'essential-free-gifts-bogo',
+    consoleKey: 'window.essentialFreeGiftsConfig',
+    accessConfirmed: false,
+    accessNote: 'Confirm the final collaborator permission list internally before sending the request.',
+    access: [
+      'Themes',
+      'Edit theme code',
+      'Manage and install apps and channels',
+      'Products',
+      'Discounts'
+    ]
+  },
+  {
+    id: 'essential-checkout',
+    name: 'Essential Checkout',
+    slug: 'essential-checkout',
+    consoleKey: null,
+    accessConfirmed: false,
+    accessNote: 'Confirm the final collaborator permission list internally before sending the request.',
+    access: [
+      'Manage and install apps and channels',
+      'Orders',
+      'Manage Settings'
+    ]
   }
   // TODO: Add more apps here as they are onboarded to support
 ];
@@ -176,22 +221,3 @@ window.ESSENTIAL_APPS = [
 window.ESSENTIAL_APPS.sort(function (a, b) {
   return a.name.localeCompare(b.name);
 });
-
-(function loadUiEnhancements() {
-  function appendEnhancementsScript() {
-    if (document.querySelector('script[src="enhancements.js"]')) return;
-
-    var script = document.createElement('script');
-    script.src = 'enhancements.js';
-    script.defer = true;
-    document.body.appendChild(script);
-  }
-
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', function () {
-      setTimeout(appendEnhancementsScript, 0);
-    });
-  } else {
-    setTimeout(appendEnhancementsScript, 0);
-  }
-})();

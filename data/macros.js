@@ -11,7 +11,7 @@ window.ESSENTIAL_MACROS = [
     description: 'Use when you need to request collaborator access and no request code is required.',
     body: `Hi there,
 
-My name is Wendyle from the Essential Apps support team. Thank you for reaching out!
+My name is {{agent_name}} from the Essential Apps support team. Thank you for reaching out!
 
 To help you with {{issue_summary}}, I'd need to take a closer look at your store's theme and app setup directly. Could you please grant me collaborator access to your store?
 
@@ -29,7 +29,7 @@ Once access is granted, I'll jump in and investigate right away.
 Please let me know if you have any questions!
 
 Best regards,
-Wendyle
+{{agent_name}}
 Essential Apps Support`
   },
 
@@ -39,7 +39,7 @@ Essential Apps Support`
     description: 'Use when the store has collaborator request code enabled.',
     body: `Hi there,
 
-My name is Wendyle from the Essential Apps support team. Thank you for reaching out!
+My name is {{agent_name}} from the Essential Apps support team. Thank you for reaching out!
 
 To look into {{issue_summary}} for you, I'll need to request collaborator access to your store. It looks like your store requires a 4-digit collaborator request code to complete the request.
 
@@ -53,7 +53,7 @@ Here's how to find it:
 Once you share the code with me, I'll send the access request right away, and we'll get this sorted for you as quickly as possible.
 
 Best regards,
-Wendyle
+{{agent_name}}
 Essential Apps Support`
   },
 
@@ -63,7 +63,7 @@ Essential Apps Support`
     description: 'Use when the app embed block is not toggled on in the theme customizer.',
     body: `Hi there,
 
-My name is Wendyle from the Essential Apps support team. Thank you for reaching out!
+My name is {{agent_name}} from the Essential Apps support team. Thank you for reaching out!
 
 I believe the reason {{app_name}} is not appearing on your store is that the app embed block has not been enabled in your theme settings.
 
@@ -81,7 +81,7 @@ Once enabled, please do a hard refresh on your storefront (Ctrl+Shift+R or Cmd+S
 Please let me know if you need any help with these steps!
 
 Best regards,
-Wendyle
+{{agent_name}}
 Essential Apps Support`
   },
 
@@ -91,7 +91,7 @@ Essential Apps Support`
     description: 'Use when the merchant sees a grey or blank screen when opening the app.',
     body: `Hi there,
 
-My name is Wendyle from the Essential Apps support team. Thank you for reaching out!
+My name is {{agent_name}} from the Essential Apps support team. Thank you for reaching out!
 
 I'm sorry to hear you're seeing a grey or blank screen when opening {{app_name}}. This is usually caused by a browser extension or network setting blocking the app from loading.
 
@@ -105,7 +105,7 @@ Please try the following steps:
 Could you let me know the results of these tests? This will help us narrow down the cause and get you back up and running quickly.
 
 Best regards,
-Wendyle
+{{agent_name}}
 Essential Apps Support`
   },
 
@@ -115,22 +115,18 @@ Essential Apps Support`
     description: 'Use when a countdown timer using the "fixed minutes" type has reached zero and disappeared.',
     body: `Hi there,
 
-My name is Wendyle from the Essential Apps support team. Thank you for reaching out!
+My name is {{agent_name}} from the Essential Apps support team. Thank you for reaching out!
 
-I understand your countdown timer is no longer showing. Based on your setup, it appears you're using the "Fixed Minutes" timer type. This type of timer counts down for a set number of minutes and disappears once it reaches zero for that visitor session.
+I understand your countdown timer is no longer showing. Based on your setup, you're using the Fixed Minutes timer type. This timer starts separately for each visitor and can disappear for that visitor after it reaches zero.
 
-To keep the timer visible continuously, I'd recommend switching to one of the other timer types:
+Please first test the storefront in an incognito window or another browser/device. A fresh visitor session should show the timer again.
 
-- **Scheduled**: Set a fixed end date and time (great for sales or events)
-- **Daily recurring**: Resets at a set time every day
-- **Evergreen**: Each visitor gets their own countdown that resets on each visit
-
-You can update this in the {{app_name}} dashboard under your timer's settings.
+If you want the timer to continue running after it reaches zero, open the timer's Content tab and change the "Once it ends" behavior to "Repeat the countdown." Save and publish the timer after updating the setting.
 
 Please let me know if you'd like help setting it up, or if you have any questions!
 
 Best regards,
-Wendyle
+{{agent_name}}
 Essential Apps Support`
   },
 
@@ -140,7 +136,7 @@ Essential Apps Support`
     description: 'Use when the requested feature or behavior is limited by Shopify itself.',
     body: `Hi there,
 
-My name is Wendyle from the Essential Apps support team. Thank you for reaching out!
+My name is {{agent_name}} from the Essential Apps support team. Thank you for reaching out!
 
 I appreciate you sharing this with us. After looking into your request, I want to let you know that {{issue_summary}} is unfortunately a limitation of the Shopify platform itself, rather than something specific to {{app_name}}.
 
@@ -151,7 +147,7 @@ I completely understand this may be frustrating, and I'm sorry I don't have a be
 In the meantime, please don't hesitate to reach out if there's anything else I can help with!
 
 Best regards,
-Wendyle
+{{agent_name}}
 Essential Apps Support`
   },
 
@@ -161,7 +157,7 @@ Essential Apps Support`
     description: 'Use when another app or theme is causing a conflict.',
     body: `Hi there,
 
-My name is Wendyle from the Essential Apps support team. Thank you for reaching out!
+My name is {{agent_name}} from the Essential Apps support team. Thank you for reaching out!
 
 After investigating, it appears the issue you're experiencing may be caused by a conflict between {{app_name}} and {{conflicting_app_or_theme}} on your store.
 
@@ -176,7 +172,7 @@ Here are a few things we can try:
 I'm happy to assist investigate further if you can grant me collaborator access. Please let me know how you'd like to proceed!
 
 Best regards,
-Wendyle
+{{agent_name}}
 Essential Apps Support`
   },
 
@@ -186,7 +182,7 @@ Essential Apps Support`
     description: 'Use when the merchant is requesting a feature that does not exist yet.',
     body: `Hi there,
 
-My name is Wendyle from the Essential Apps support team. Thank you for reaching out and for sharing this idea!
+My name is {{agent_name}} from the Essential Apps support team. Thank you for reaching out and for sharing this idea!
 
 I love hearing how merchants want to use {{app_name}}. I've passed your request for {{issue_summary}} along to our product team for consideration.
 
@@ -197,7 +193,7 @@ In the meantime, if there's a workaround or alternative approach that might help
 Thank you again for taking the time to share this with us!
 
 Best regards,
-Wendyle
+{{agent_name}}
 Essential Apps Support`
   },
 
@@ -207,7 +203,7 @@ Essential Apps Support`
     description: 'Use for billing inquiries, unexpected charges, or refund requests.',
     body: `Hi there,
 
-My name is Wendyle from the Essential Apps support team. Thank you for reaching out!
+My name is {{agent_name}} from the Essential Apps support team. Thank you for reaching out!
 
 I'm sorry to hear about this billing concern. I understand how frustrating unexpected charges can be.
 
@@ -226,7 +222,7 @@ Please note that refunds for Shopify app charges are processed through Shopify's
 I'm here to help in any way I can. Please let me know if you have any additional questions!
 
 Best regards,
-Wendyle
+{{agent_name}}
 Essential Apps Support`
   },
 
@@ -246,7 +242,103 @@ You can leave a review here:
 Thank you so much for your support — we're always here if you need anything!
 
 Best regards,
-Wendyle
+{{agent_name}}
+Essential Apps Support`
+  },
+
+  {
+    id: 'conversation-opening',
+    label: 'Start of Conversation',
+    description: 'Short opening response for a new support conversation.',
+    body: `Hi there,
+
+Thank you for getting in touch. My name is {{agent_name}}, and I’d be happy to assist you with this.
+
+Best regards,
+{{agent_name}}
+Essential Apps Support`
+  },
+
+  {
+    id: 'requested-change-access-no-code',
+    label: 'Request Access for a Storefront Change',
+    description: 'Use when the merchant asks for a change and no collaborator request code is required.',
+    body: `Hi there,
+
+Thank you for reaching out. My name is {{agent_name}}, and I’d be happy to assist with the requested change to {{app_name}}.
+
+To make the change safely, I’ll need collaborator access to the relevant theme and app settings. You will receive an access request shortly. Please enable the following permissions:
+
+{{required_access}}
+
+Once access is granted, please let me know and I’ll begin reviewing the requested change.
+
+Best regards,
+{{agent_name}}
+Essential Apps Support`
+  },
+
+  {
+    id: 'requested-change-access-code',
+    label: 'Request Collaborator Code for a Change',
+    description: 'Use when a requested change requires a 4-digit collaborator request code.',
+    body: `Hi there,
+
+Thank you for reaching out. My name is {{agent_name}}, and I’d be happy to assist with the requested change to {{app_name}}.
+
+Before I can send the collaborator access request, please share your 4-digit collaborator request code. You can find it in Shopify Admin under Settings > Users and permissions > Collaborators.
+
+Once I receive the code, I’ll send the access request and begin reviewing the change.
+
+Best regards,
+{{agent_name}}
+Essential Apps Support`
+  },
+
+  {
+    id: 'site-speed',
+    label: 'Site Speed Explanation',
+    description: 'Use when a merchant asks whether an Essential app affects initial page-load speed.',
+    body: `Hi there,
+
+Thank you for reaching out. {{app_name}} loads after the storefront’s initial page content and its script is served through Shopify’s CDN. This means the app does not block the initial storefront render in the same way as a script loaded before the page content.
+
+If you are seeing a measurable slowdown, please send the affected URL and the before/after speed-test reports so we can compare the same page, device, and test conditions.
+
+Best regards,
+{{agent_name}}
+Essential Apps Support`
+  },
+
+  {
+    id: 'app-code-removal',
+    label: 'App Code Removal Request',
+    description: 'Use when a merchant asks whether an Online Store 2.0 app left a manually installed theme snippet.',
+    body: `Hi there,
+
+My name is {{agent_name}} from Essential Apps, and I’d be happy to clarify this.
+
+{{app_name}} uses Shopify Online Store 2.0 theme app extensions. The storefront integration is added by Shopify when the app embed or app block is enabled; our app does not manually install a permanent theme snippet for that standard setup.
+
+Please disable the app embed or remove the app block in the active theme and save the changes. If you still see app-related storefront output afterwards, send the affected URL and theme name so we can review it.
+
+Best regards,
+{{agent_name}}
+Essential Apps Support`
+  },
+
+  {
+    id: 'currency-format-republish',
+    label: 'Currency Format and Republish Guidance',
+    description: 'Use when a booster displays an unexpected currency symbol, spacing, or format.',
+    body: `Hi there,
+
+{{app_name}} reads the Shopify store currency format. Please review it under Shopify Admin > Settings > Store currency and confirm that the symbol and amount formatting are correct.
+
+After changing the Shopify currency format, unpublish and republish the affected booster so the updated format is loaded on the storefront. Then test again in an incognito window.
+
+Best regards,
+{{agent_name}}
 Essential Apps Support`
   }
 
